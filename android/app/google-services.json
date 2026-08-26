@@ -1,0 +1,120 @@
+{
+  "project_info": {
+    "project_number": "160639709055",
+    "project_id": "atta-studio-develop",
+    "storage_bucket": "atta-studio-develop.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160639709055:android:a7cad415f12dc91213f44a",
+        "android_client_info": {
+          "package_name": "com.atta.customer_app_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7Ci-dvM37df-IN6DVBhDZYvCUHKsphVU"
+        },
+        {
+          "current_key": "AIzaSyBDUcIHHCor67GeGjm1QZc_gH9LWq8bW64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160639709055:android:d7db38f8a1e8fdb513f44a",
+        "android_client_info": {
+          "package_name": "com.atta.driver_app_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7Ci-dvM37df-IN6DVBhDZYvCUHKsphVU"
+        },
+        {
+          "current_key": "AIzaSyBDUcIHHCor67GeGjm1QZc_gH9LWq8bW64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160639709055:android:559248516952071413f44a",
+        "android_client_info": {
+          "package_name": "com.atta.merchant_app_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7Ci-dvM37df-IN6DVBhDZYvCUHKsphVU"
+        },
+        {
+          "current_key": "AIzaSyBDUcIHHCor67GeGjm1QZc_gH9LWq8bW64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160639709055:android:690b8bcd094da7fa13f44a",
+        "android_client_info": {
+          "package_name": "com.example.atta_customer_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7Ci-dvM37df-IN6DVBhDZYvCUHKsphVU"
+        },
+        {
+          "current_key": "AIzaSyBDUcIHHCor67GeGjm1QZc_gH9LWq8bW64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160639709055:android:490731cef135c03213f44a",
+        "android_client_info": {
+          "package_name": "com.merchant.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7Ci-dvM37df-IN6DVBhDZYvCUHKsphVU"
+        },
+        {
+          "current_key": "AIzaSyBDUcIHHCor67GeGjm1QZc_gH9LWq8bW64"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

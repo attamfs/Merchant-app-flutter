@@ -1,0 +1,78 @@
+import 'package:flutter/material.dart';
+
+class DashboardTrendingNow extends StatelessWidget {
+  const DashboardTrendingNow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final trendingTerms = ['Burgers', 'Coffee', 'Pizza', 'Shawarma', 'Sushi'];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.trending_up, color: Colors.blue[500]),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Trending Now',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: Icon(Icons.map, color: Theme.of(context).colorScheme.primary),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: trendingTerms.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                return _buildTrendingBadge(trendingTerms[index]);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrendingBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.blue[50],
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.search, size: 14, color: Colors.blue[700]),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.blue[700],
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
