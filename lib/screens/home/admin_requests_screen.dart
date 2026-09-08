@@ -56,7 +56,7 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
           adminRequests.sort((a, b) {
             DateTime parseDate(dynamic val) {
               if (val is Timestamp) return val.toDate();
-              if (val is String) return DateTime.tryParse(val) ?? DateTime.now();
+              if (val is String) return DateTime.tryParse(val)?.toLocal() ?? DateTime.now();
               return DateTime.now();
             }
             final dateA = parseDate(a['createdAt']);
@@ -115,7 +115,7 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
     if (req['createdAt'] is Timestamp) {
       createdAt = (req['createdAt'] as Timestamp).toDate();
     } else if (req['createdAt'] is String) {
-      createdAt = DateTime.tryParse(req['createdAt']) ?? DateTime.now();
+      createdAt = DateTime.tryParse(req['createdAt'])?.toLocal() ?? DateTime.now();
     }
 
     Color statusColor;

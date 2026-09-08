@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import '../../widgets/field_label.dart';
 
 class RegisterUserScreen extends StatefulWidget {
   const RegisterUserScreen({super.key});
@@ -144,7 +145,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
               TextFormField(
                 controller: _businessNameCtrl,
                 decoration: InputDecoration(
-                  labelText: 'Business Name',
+                  label: const FieldLabel(text: 'Business Name'),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -159,7 +160,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                     child: TextFormField(
                       controller: _crNumberCtrl,
                       decoration: InputDecoration(
-                        labelText: 'CR Number',
+                        label: const FieldLabel(text: 'CR Number'),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -172,7 +173,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                     child: TextFormField(
                       controller: _branchNumberCtrl,
                       decoration: InputDecoration(
-                        labelText: 'Branch Number',
+                        label: const FieldLabel(text: 'Branch Number'),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -190,7 +191,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                 obscureText: true,
                 maxLength: 4,
                 decoration: InputDecoration(
-                  labelText: '4-Digit PIN',
+                  label: const FieldLabel(text: '4-Digit PIN'),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

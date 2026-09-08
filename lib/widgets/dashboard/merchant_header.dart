@@ -3,6 +3,7 @@ import '../../screens/home/my_qr_screen.dart';
 import '../../screens/home/payments_screen.dart';
 import '../../screens/home/payment_request_screen.dart';
 import '../../services/merchant_service.dart';
+import '../../screens/home/settings_screen.dart';
 
 class MerchantHeader extends StatefulWidget {
   final String merchantName;
@@ -10,7 +11,12 @@ class MerchantHeader extends StatefulWidget {
   final double loyaltyPoints;
   final double issuedLoyalty;
   final double issuedCashback;
+  final String? imageUrl;
   final VoidCallback onLogout;
+  final bool isCashier;
+  final String? cashierName;
+  final String? counterNumber;
+  final bool isShiftClosed;
 
   const MerchantHeader({
     super.key,
@@ -19,7 +25,12 @@ class MerchantHeader extends StatefulWidget {
     required this.loyaltyPoints,
     this.issuedLoyalty = 0.0,
     this.issuedCashback = 0.0,
+    this.imageUrl,
     required this.onLogout,
+    this.isCashier = false,
+    this.cashierName,
+    this.counterNumber,
+    this.isShiftClosed = false,
   });
 
   @override
@@ -102,12 +113,59 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                     ],
                   ),
                   const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: widget.onLogout,
-                    child: const CircleAvatar(
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 48),
+                    onSelected: (value) {
+                      if (value == 'settings') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                        );
+                      } else if (value == 'logout') {
+                        widget.onLogout();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        enabled: false,
+                        child: Text(
+                          'My Account',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      const PopupMenuItem<String>(
+                        value: 'settings',
+                        child: Row(
+                          children: [
+                            Icon(Icons.settings, size: 20, color: Colors.black54),
+                            SizedBox(width: 12),
+                            Text('Settings'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      const PopupMenuItem<String>(
+                        value: 'logout',
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout, size: 20, color: Colors.black54),
+                            SizedBox(width: 12),
+                            Text('Logout'),
+                          ],
+                        ),
+                      ),
+                    ],
+                    child: CircleAvatar(
                       backgroundColor: Colors.white,
                       radius: 18,
-                      child: Icon(Icons.storefront, color: Colors.blue), // Placeholder avatar
+                      backgroundImage: widget.imageUrl != null ? NetworkImage(widget.imageUrl!) : null,
+                      child: widget.imageUrl == null
+                          ? Text(
+                              widget.merchantName.isNotEmpty ? widget.merchantName[0].toUpperCase() : 'M',
+                              style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                            )
+                          : null,
                     ),
                   ),
                 ],
@@ -156,6 +214,17 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                       ),
                       ],
                     ),
+                    if (widget.isCashier && widget.cashierName != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Cashier: ${widget.cashierName} ${widget.counterNumber != null ? '| Counter: ${widget.counterNumber}' : ''}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -219,6 +288,7 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                   context,
                   Icons.qr_code, 
                   'My QR',
+                  disabled: widget.isCashier && widget.isShiftClosed,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -227,23 +297,25 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                   },
                 ),
               ),
-              Expanded(
-                child: _buildActionItem(
-                  context,
-                  Icons.verified_user_outlined, 
-                  'KYC Update',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('KYC Update coming soon')),
-                    );
-                  },
+              if (!widget.isCashier)
+                Expanded(
+                  child: _buildActionItem(
+                    context,
+                    Icons.verified_user_outlined, 
+                    'KYC Update',
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('KYC Update coming soon')),
+                      );
+                    },
+                  ),
                 ),
-              ),
               Expanded(
                 child: _buildActionItem(
                   context, 
                   Icons.credit_card, 
                   'Payments',
+                  disabled: widget.isCashier && widget.isShiftClosed,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -257,6 +329,7 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                   context, 
                   Icons.send, 
                   'Payment\nRequest',
+                  disabled: widget.isCashier && widget.isShiftClosed,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -272,32 +345,39 @@ class _MerchantHeaderState extends State<MerchantHeader> {
     );
   }
 
-  Widget _buildActionItem(BuildContext context, IconData icon, String label, {VoidCallback? onTap}) {
+  Widget _buildActionItem(BuildContext context, IconData icon, String label, {VoidCallback? onTap, bool disabled = false}) {
     return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
+      onTap: disabled ? () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Open counter to access this feature')),
+        );
+      } : onTap,
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1.0,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 28),
             ),
-            child: Icon(icon, color: Colors.white, size: 28),
-          ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 11, // Slightly smaller font to fit 4 items better
-            fontWeight: FontWeight.w500,
-          ),
-          maxLines: 2,
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11, // Slightly smaller font to fit 4 items better
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+            ),
+          ],
         ),
-      ],
       ),
     );
   }

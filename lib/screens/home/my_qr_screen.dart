@@ -63,7 +63,7 @@ class MyQrScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: QrImageView(
-                          data: 'merchant:${merchantUser.merchantId}',
+                          data: merchantUser.role == MerchantRole.cashier ? 'merchant:${user.uid}' : 'merchant:${merchantUser.merchantId}',
                           version: QrVersions.auto,
                           size: 200.0,
                         ),

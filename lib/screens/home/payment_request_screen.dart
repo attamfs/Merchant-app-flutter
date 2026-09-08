@@ -5,7 +5,14 @@ import 'package:intl/intl.dart';
 import 'create_payment_request_screen.dart';
 
 class PaymentRequestScreen extends StatefulWidget {
-  const PaymentRequestScreen({super.key});
+  final bool isCashier;
+  final String? merchantId;
+
+  const PaymentRequestScreen({
+    super.key,
+    this.isCashier = false,
+    this.merchantId,
+  });
 
   @override
   State<PaymentRequestScreen> createState() => _PaymentRequestScreenState();
@@ -14,6 +21,7 @@ class PaymentRequestScreen extends StatefulWidget {
 class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Map<String, Map<String, dynamic>> _userCache = {};
 
   void _cancelRequest(String requestId) async {
     // Show dialog to confirm cancellation
@@ -69,6 +77,15 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
 
+    final targetMerchantId = widget.isCashier ? (widget.merchantId ?? user.uid) : user.uid;
+    Query streamQuery = _firestore
+        .collection('paymentRequests')
+        .where('merchantId', isEqualTo: targetMerchantId);
+        
+    if (widget.isCashier) {
+      streamQuery = streamQuery.where('cashierId', isEqualTo: user.uid);
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -82,17 +99,18 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreatePaymentRequestScreen()),
+                MaterialPageRoute(builder: (context) => CreatePaymentRequestScreen(
+                  merchantId: widget.merchantId ?? _auth.currentUser?.uid ?? '',
+                  isCashier: widget.isCashier,
+                  cashierId: widget.isCashier ? _auth.currentUser?.uid : null,
+                )),
               );
             },
           ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('paymentRequests')
-            .where('merchantId', isEqualTo: user.uid)
-            .snapshots(),
+        stream: streamQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -107,8 +125,16 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
           requests.sort((a, b) {
             final aData = a.data() as Map<String, dynamic>;
             final bData = b.data() as Map<String, dynamic>;
-            final aDate = (aData['date'] as Timestamp?)?.toDate() ?? DateTime.now();
-            final bDate = (bData['date'] as Timestamp?)?.toDate() ?? DateTime.now();
+            
+            DateTime parseDate(dynamic d) {
+              if (d is Timestamp) return d.toDate();
+              if (d is String) return DateTime.tryParse(d)?.toLocal() ?? DateTime.now();
+              if (d is int) return DateTime.fromMillisecondsSinceEpoch(d);
+              return DateTime.now();
+            }
+            
+            final aDate = parseDate(aData['date']);
+            final bDate = parseDate(bData['date']);
             return bDate.compareTo(aDate);
           });
 
@@ -127,7 +153,11 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CreatePaymentRequestScreen()),
+                        MaterialPageRoute(builder: (context) => CreatePaymentRequestScreen(
+                          merchantId: widget.merchantId ?? _auth.currentUser?.uid ?? '',
+                          isCashier: widget.isCashier,
+                          cashierId: widget.isCashier ? _auth.currentUser?.uid : null,
+                        )),
                       );
                     },
                     icon: const Icon(Icons.add),
@@ -147,7 +177,13 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
               
               final status = data['status'] ?? 'pending';
               final amount = (data['amount'] ?? 0).toDouble();
-              final date = (data['date'] as Timestamp?)?.toDate() ?? DateTime.now();
+              DateTime parseDate(dynamic d) {
+                if (d is Timestamp) return d.toDate();
+                if (d is String) return DateTime.tryParse(d)?.toLocal() ?? DateTime.now();
+                if (d is int) return DateTime.fromMillisecondsSinceEpoch(d);
+                return DateTime.now();
+              }
+              final date = parseDate(data['date']);
               
               Color statusColor;
               IconData statusIcon;
@@ -162,6 +198,49 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
                 statusIcon = Icons.access_time;
               }
 
+              final customerId = data['customerId']?.toString() ?? '';
+              final merchantId = data['merchantId']?.toString() ?? '';
+              final isPayer = customerId == _auth.currentUser?.uid;
+              final otherPartyId = isPayer ? merchantId : customerId;
+              
+              Map<String, dynamic> userProfile = {
+                'name': 'Unknown',
+                'imageUrl': null,
+              };
+
+              if (otherPartyId.isNotEmpty) {
+                if (_userCache.containsKey(otherPartyId)) {
+                  userProfile = _userCache[otherPartyId]!;
+                } else {
+                  // Fire off request
+                  // Try users first
+                  _firestore.collection('users').doc(otherPartyId).get().then((userDoc) {
+                    if (userDoc.exists && mounted) {
+                      final uData = userDoc.data();
+                      setState(() {
+                        _userCache[otherPartyId] = {
+                          'name': uData?['name']?.toString() ?? 'Unknown',
+                          'imageUrl': (uData?['imageUrl'] ?? uData?['avatarUrl'] ?? uData?['photoURL'])?.toString(),
+                        };
+                      });
+                    } else if (mounted) {
+                      // Try merchants
+                      _firestore.collection('merchants').doc(otherPartyId).get().then((merchantDoc) {
+                        if (merchantDoc.exists && mounted) {
+                          final mData = merchantDoc.data();
+                          setState(() {
+                            _userCache[otherPartyId] = {
+                              'name': mData?['businessName']?.toString() ?? mData?['name']?.toString() ?? 'Unknown',
+                              'imageUrl': (mData?['imageUrl'] ?? mData?['avatarUrl'] ?? mData?['photoURL'])?.toString(),
+                            };
+                          });
+                        }
+                      });
+                    }
+                  });
+                }
+              }
+
               return Card(
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -171,6 +250,33 @@ class _PaymentRequestScreenState extends State<PaymentRequestScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          if (userProfile['imageUrl'] != null && userProfile['imageUrl'].toString().isNotEmpty)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Image.network(
+                                userProfile['imageUrl'],
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const CircleAvatar(radius: 20, child: Icon(Icons.person)),
+                              ),
+                            )
+                          else
+                            const CircleAvatar(radius: 20, child: Icon(Icons.person)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              userProfile['name']?.toString() ?? 'Unknown',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

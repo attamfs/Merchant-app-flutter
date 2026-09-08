@@ -19,13 +19,21 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
   bool _isLoading = false;
   bool _otpSent = false;
   bool _testMode = false;
+  String? _phoneErrorText;
 
   void _sendOtp() {
     final phone = _phoneController.text.trim();
     if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a mobile number')),
-      );
+      setState(() {
+        _phoneErrorText = 'Please enter a mobile number';
+      });
+      return;
+    }
+
+    if (_selectedCountryCode == '+973' && phone.length != 8) {
+      setState(() {
+        _phoneErrorText = 'Bahrain numbers must be 8 digits.';
+      });
       return;
     }
 
@@ -195,6 +203,14 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                             onChanged: (value) {
                               setState(() {
                                 _selectedCountryCode = value!;
+                                final phone = _phoneController.text;
+                                if (phone.isNotEmpty) {
+                                  if (_selectedCountryCode == '+973' && phone.length != 8) {
+                                    _phoneErrorText = 'Bahrain numbers must be 8 digits.';
+                                  } else {
+                                    _phoneErrorText = null;
+                                  }
+                                }
                               });
                             },
                           ),
@@ -207,6 +223,25 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                           controller: _phoneController,
                           hintText: 'Mobile Number',
                           keyboardType: TextInputType.phone,
+                          maxLength: _selectedCountryCode == '+973' ? 8 : 15,
+                          errorText: _phoneErrorText,
+                          onChanged: (value) {
+                            if (value.isEmpty) {
+                              setState(() {
+                                _phoneErrorText = 'Please enter a mobile number';
+                              });
+                            } else if (_selectedCountryCode == '+973' && value.length != 8) {
+                              setState(() {
+                                _phoneErrorText = 'Bahrain numbers must be 8 digits.';
+                              });
+                            } else {
+                              if (_phoneErrorText != null) {
+                                setState(() {
+                                  _phoneErrorText = null;
+                                });
+                              }
+                            }
+                          },
                         ),
                       ),
                     ],

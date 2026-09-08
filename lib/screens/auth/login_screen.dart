@@ -254,8 +254,48 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
   final _counterController = TextEditingController();
   final _employeeController = TextEditingController();
   final _passwordController = TextEditingController();
+  final FocusNode _crFocusNode = FocusNode();
+  final FocusNode _counterFocusNode = FocusNode();
+  final FocusNode _employeeFocusNode = FocusNode();
+
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  List<String> _savedCRNumbers = [];
+  List<String> _savedCounterNumbers = [];
+  List<String> _savedEmployeeNumbers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedFields();
+  }
+
+  Future<void> _loadSavedFields() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _savedCRNumbers = prefs.getStringList('saved_cashier_cr_numbers') ?? [];
+      _savedCounterNumbers = prefs.getStringList('saved_cashier_counter_numbers') ?? [];
+      _savedEmployeeNumbers = prefs.getStringList('saved_cashier_employee_numbers') ?? [];
+    });
+  }
+
+  Future<void> _saveFields(String cr, String counter, String employee) async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    if (!_savedCRNumbers.contains(cr)) {
+      _savedCRNumbers.add(cr);
+      await prefs.setStringList('saved_cashier_cr_numbers', _savedCRNumbers);
+    }
+    if (!_savedCounterNumbers.contains(counter)) {
+      _savedCounterNumbers.add(counter);
+      await prefs.setStringList('saved_cashier_counter_numbers', _savedCounterNumbers);
+    }
+    if (!_savedEmployeeNumbers.contains(employee)) {
+      _savedEmployeeNumbers.add(employee);
+      await prefs.setStringList('saved_cashier_employee_numbers', _savedEmployeeNumbers);
+    }
+  }
 
   Future<void> _login() async {
     final cr = _crController.text.trim();
@@ -279,6 +319,8 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
         employeeNumber: employee,
         password: password,
       );
+
+      await _saveFields(cr, counter, employee);
 
       if (mounted && userCredential.user != null) {
         final merchantUser = await authService.getMerchantUser(userCredential.user!);
@@ -308,25 +350,102 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
   }
 
   @override
+  void dispose() {
+    _crController.dispose();
+    _counterController.dispose();
+    _employeeController.dispose();
+    _passwordController.dispose();
+    _crFocusNode.dispose();
+    _counterFocusNode.dispose();
+    _employeeFocusNode.dispose();
+    super.dispose();
+  }
+
+  Widget _buildAutocompleteField({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String hintText,
+    required List<String> optionsList,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return RawAutocomplete<String>(
+      textEditingController: controller,
+      focusNode: focusNode,
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return optionsList;
+        }
+        return optionsList.where((option) => option.contains(textEditingValue.text));
+      },
+      onSelected: (String selection) {
+        controller.text = selection;
+      },
+      fieldViewBuilder: (context, fieldController, fieldFocusNode, onFieldSubmitted) {
+        return CustomTextField(
+          controller: fieldController,
+          focusNode: fieldFocusNode,
+          hintText: hintText,
+          keyboardType: keyboardType,
+        );
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4.0,
+            borderRadius: BorderRadius.circular(8),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200, maxWidth: 250),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final String option = options.elementAt(index);
+                  return InkWell(
+                    onTap: () {
+                      onSelected(option);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(option),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
-          CustomTextField(
+          _buildAutocompleteField(
             controller: _crController,
+            focusNode: _crFocusNode,
             hintText: 'Merchant CR Number',
+            optionsList: _savedCRNumbers,
           ),
           const SizedBox(height: 16),
-          CustomTextField(
+          _buildAutocompleteField(
             controller: _counterController,
+            focusNode: _counterFocusNode,
             hintText: 'Cashier Counter Number',
+            optionsList: _savedCounterNumbers,
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
-          CustomTextField(
+          _buildAutocompleteField(
             controller: _employeeController,
+            focusNode: _employeeFocusNode,
             hintText: 'Employee Number',
+            optionsList: _savedEmployeeNumbers,
           ),
           const SizedBox(height: 16),
           CustomTextField(

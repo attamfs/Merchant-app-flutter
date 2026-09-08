@@ -23,7 +23,7 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('My Store', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text('Merchant Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,

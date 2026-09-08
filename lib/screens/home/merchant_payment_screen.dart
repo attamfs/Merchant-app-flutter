@@ -3,8 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MerchantPaymentScreen extends StatefulWidget {
   final String merchantId;
+  final String? cashierId;
+  final String? counterNumber;
 
-  const MerchantPaymentScreen({super.key, required this.merchantId});
+  const MerchantPaymentScreen({super.key, required this.merchantId, this.cashierId, this.counterNumber});
 
   @override
   State<MerchantPaymentScreen> createState() => _MerchantPaymentScreenState();

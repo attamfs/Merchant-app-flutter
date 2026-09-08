@@ -4,7 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
 class ShiftHistoryScreen extends StatefulWidget {
-  const ShiftHistoryScreen({super.key});
+  final bool isCashier;
+  final String? merchantId;
+
+  const ShiftHistoryScreen({
+    super.key,
+    this.isCashier = false,
+    this.merchantId,
+  });
 
   @override
   State<ShiftHistoryScreen> createState() => _ShiftHistoryScreenState();
@@ -21,6 +28,16 @@ class _ShiftHistoryScreenState extends State<ShiftHistoryScreen> {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
 
+    final targetMerchantId = widget.isCashier ? (widget.merchantId ?? user.uid) : user.uid;
+    Query streamQuery = _firestore
+        .collection('merchants')
+        .doc(targetMerchantId)
+        .collection('shiftClosings');
+        
+    if (widget.isCashier) {
+      streamQuery = streamQuery.where('cashierId', isEqualTo: user.uid);
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -30,11 +47,7 @@ class _ShiftHistoryScreenState extends State<ShiftHistoryScreen> {
         elevation: 1,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('merchants')
-            .doc(user.uid)
-            .collection('shiftClosings')
-            .snapshots(),
+        stream: streamQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -76,7 +89,7 @@ class _ShiftHistoryScreenState extends State<ShiftHistoryScreen> {
             itemCount: shifts.length,
             itemBuilder: (context, index) {
               final shift = shifts[index];
-              return _ShiftItem(shift: shift, merchantId: user.uid);
+              return _ShiftItem(shift: shift, merchantId: targetMerchantId);
             },
           );
         },

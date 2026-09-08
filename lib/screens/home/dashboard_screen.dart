@@ -10,7 +10,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../screens/home/transactions_screen.dart';
 import '../../screens/home/settings_screen.dart';
 import '../../screens/home/my_store_screen.dart';
+import '../../screens/home/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'end_of_day_screen.dart';
+import 'my_qr_screen.dart';
+import 'merchant_payment_screen.dart';
+import 'create_payment_request_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -21,6 +27,37 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
+  String _shiftStatus = 'closed';
+  String? _counterNumber;
+  bool _prefsLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _shiftStatus = prefs.getString('cashier_shift_status') ?? 'closed';
+      _counterNumber = prefs.getString('cashier_counter_number');
+      _prefsLoaded = true;
+    });
+  }
+
+  Future<void> _openCounter() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('cashier_shift_status', 'open');
+    setState(() {
+      _shiftStatus = 'open';
+    });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Counter Opened: You can now accept payments and process transactions.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +96,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showCounterClosedToast() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please open your counter to accept payments.')),
+    );
+  }
+
+  Widget _buildTopAction(IconData icon, String label, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+              ],
+            ),
+            child: Icon(icon, color: Colors.black87, size: 28),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        ],
       ),
     );
   }
@@ -114,7 +181,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 2:
         return const SettingsScreen();
       case 3:
-        return const MyStoreScreen();
+        return const ProfileScreen();
       case 0:
       default:
         return _buildHomeDashboard(authService, user);
@@ -125,7 +192,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return FutureBuilder<MerchantUser?>(
       future: authService.getMerchantUser(user),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting || !_prefsLoaded) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -134,6 +201,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
 
         final merchantUser = snapshot.data!;
+
+        if (merchantUser.role == MerchantRole.unauthorized || merchantUser.merchantId.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                const SizedBox(height: 16),
+                const Text(
+                  'Access Denied or Missing Data',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text('We could not find your merchant profile.'),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () async {
+                    await authService.logout();
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, '/');
+                    }
+                  },
+                  child: const Text('Logout'),
+                ),
+              ],
+            ),
+          );
+        }
+
         final merchantService = MerchantService();
 
         return StreamBuilder<DocumentSnapshot>(
@@ -145,6 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             double loyaltyPoints = 0.0;
             double issuedLoyalty = 0.0;
             double issuedCashback = 0.0;
+            String? imageUrl;
 
             if (merchantSnapshot.hasData && merchantSnapshot.data!.exists) {
               final data = merchantSnapshot.data!.data() as Map<String, dynamic>;
@@ -152,10 +249,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               loyaltyPoints = (data['loyaltyPoints'] ?? 0).toDouble();
               issuedLoyalty = (data['issuedMerchantLoyaltyPoints'] ?? 0).toDouble();
               issuedCashback = (data['issuedMerchantCashbackPoints'] ?? 0).toDouble();
+              imageUrl = (data['imageUrl'] ?? data['logoUrl'])?.toString();
               if (data['activeSubscription'] != null) {
                 tier = (data['activeSubscription']['tierName'] ?? 'STANDARD TIER').toString().toUpperCase() + ' TIER';
               }
             }
+
+            final isCashier = merchantUser.role == MerchantRole.cashier;
+            final isShiftClosed = _shiftStatus == 'closed';
+            final cashierName = merchantUser.cashierData?['name']?.toString();
 
             return CustomScrollView(
               slivers: [
@@ -166,6 +268,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     loyaltyPoints: loyaltyPoints,
                     issuedLoyalty: issuedLoyalty,
                     issuedCashback: issuedCashback,
+                    imageUrl: imageUrl,
+                    isCashier: isCashier,
+                    cashierName: cashierName,
+                    counterNumber: _counterNumber,
+                    isShiftClosed: isShiftClosed,
                     onLogout: () async {
                       await authService.logout();
                       if (mounted) {
@@ -174,6 +281,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                   ),
                 ),
+                if (isCashier && isShiftClosed)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          border: Border.all(color: Colors.red.shade200),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Counter is Closed',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Open counter to accept payments.',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: _openCounter,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text('Open Counter'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 24),
                 ),
@@ -183,8 +350,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 24),
                 ),
-                const SliverToBoxAdapter(
-                  child: MerchantServicesGrid(),
+                SliverToBoxAdapter(
+                  child: MerchantServicesGrid(
+                    isCashier: isCashier,
+                    merchantId: merchantUser.merchantId,
+                    onEndOfDay: () async {
+                      if (isCashier) {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (_) => EndOfDayScreen(
+                            merchantId: merchantUser.merchantId,
+                            cashierData: merchantUser.cashierData,
+                          ),
+                        ));
+                      } else {
+                        await authService.logout();
+                        if (mounted) {
+                          Navigator.pushReplacementNamed(context, '/');
+                        }
+                      }
+                    },
+                  ),
                 ),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 24),

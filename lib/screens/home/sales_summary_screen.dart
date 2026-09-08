@@ -20,7 +20,14 @@ class UserSalesData {
 }
 
 class SalesSummaryScreen extends StatefulWidget {
-  const SalesSummaryScreen({super.key});
+  final bool isCashier;
+  final String? merchantId;
+
+  const SalesSummaryScreen({
+    super.key,
+    this.isCashier = false,
+    this.merchantId,
+  });
 
   @override
   State<SalesSummaryScreen> createState() => _SalesSummaryScreenState();
@@ -41,6 +48,8 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
 
+    final targetMerchantId = widget.isCashier ? (widget.merchantId ?? user.uid) : user.uid;
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -50,16 +59,16 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
         elevation: 1,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('transactions').where('merchantId', isEqualTo: user.uid).snapshots(),
+        stream: _firestore.collection('transactions').where('merchantId', isEqualTo: targetMerchantId).snapshots(),
         builder: (context, txSnapshot) {
           return StreamBuilder<QuerySnapshot>(
-            stream: _firestore.collection('paymentRequests').where('merchantId', isEqualTo: user.uid).snapshots(),
+            stream: _firestore.collection('paymentRequests').where('merchantId', isEqualTo: targetMerchantId).snapshots(),
             builder: (context, reqSnapshot) {
               return StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('merchants').doc(user.uid).collection('cashiers').snapshots(),
+                stream: _firestore.collection('merchants').doc(targetMerchantId).collection('cashiers').snapshots(),
                 builder: (context, cashiersSnapshot) {
                   return StreamBuilder<QuerySnapshot>(
-                    stream: _firestore.collection('merchants').doc(user.uid).collection('shiftClosings').snapshots(),
+                    stream: _firestore.collection('merchants').doc(targetMerchantId).collection('shiftClosings').snapshots(),
                     builder: (context, shiftSnapshot) {
                       final isLoading = txSnapshot.connectionState == ConnectionState.waiting ||
                           reqSnapshot.connectionState == ConnectionState.waiting ||
@@ -122,6 +131,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     }
 
     final filteredTransactions = transactions.where((tx) {
+      if (widget.isCashier && tx['cashierId'] != _auth.currentUser?.uid) return false;
       final dateVal = tx['date'];
       DateTime date = DateTime.now();
       if (dateVal is Timestamp) {
@@ -133,6 +143,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     }).toList();
     
     final filteredRequests = requests.where((req) {
+      if (widget.isCashier && req['cashierId'] != _auth.currentUser?.uid) return false;
       final dateVal = req['date'];
       DateTime date = DateTime.now();
       if (dateVal is Timestamp) {
@@ -259,13 +270,17 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
           const SizedBox(height: 16),
           _buildSalesChart(filteredTransactions, startInterval, endInterval),
           const SizedBox(height: 16),
-          _buildStaffSalesComparison(supervisorData, cashierMap.values.toList()),
-          const SizedBox(height: 16),
+          if (!widget.isCashier) ...[
+            _buildStaffSalesComparison(supervisorData, cashierMap.values.toList()),
+            const SizedBox(height: 16),
+          ],
           _buildVouchersPerformance(vouchersSoldCount, vouchersSoldAmount, vouchersUsedCount, vouchersUsedAmount, outstandingVouchersBalance),
           const SizedBox(height: 16),
-          _buildSupervisorSummary(supervisorData),
+          _buildSupervisorSummary(widget.isCashier && cashierMap.containsKey(_auth.currentUser?.uid) ? cashierMap[_auth.currentUser!.uid]! : supervisorData, widget.isCashier),
           const SizedBox(height: 16),
-          _buildCashierPerformance(cashierMap.values.toList()),
+          if (!widget.isCashier) ...[
+            _buildCashierPerformance(cashierMap.values.toList()),
+          ],
         ],
       ),
     );
@@ -589,13 +604,13 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     );
   }
 
-  Widget _buildSupervisorSummary(UserSalesData data) {
+  Widget _buildSupervisorSummary(UserSalesData data, bool isCashier) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: const Border(left: BorderSide(color: Colors.green, width: 4)),
+        border: Border(left: BorderSide(color: Colors.green, width: 4)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Column(
@@ -605,11 +620,11 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
             children: [
               const Icon(Icons.person_outline, color: Colors.green, size: 20),
               const SizedBox(width: 8),
-              const Text('Supervisor Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(isCashier ? 'My Summary' : 'Supervisor Summary', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           const SizedBox(height: 16),
-          _buildRow('Own Sales:', '${data.totalSales.toStringAsFixed(3)} BHD', Colors.black, isBold: true),
+          _buildRow(isCashier ? 'My Sales:' : 'Own Sales:', '${data.totalSales.toStringAsFixed(3)} BHD', Colors.black, isBold: true),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),

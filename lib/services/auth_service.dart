@@ -14,8 +14,9 @@ class AuthService {
 
   Future<MerchantUser?> getMerchantUser(User user) async {
     final firestore = FirebaseFirestore.instance;
+    
+    // 1. Check if Supervisor (roles_merchants)
     try {
-      // 1. Check if Supervisor (roles_merchants)
       final supervisorDoc = await firestore.collection('roles_merchants').doc(user.uid).get();
       if (supervisorDoc.exists) {
         return MerchantUser(
@@ -24,55 +25,132 @@ class AuthService {
           role: MerchantRole.supervisor,
         );
       }
+    } catch (e) {
+      debugPrint('Error checking supervisor role: $e');
+    }
 
-      // 2. Check if Cashier (via collectionGroup)
-      final cashiersQuery = await firestore
-          .collectionGroup('cashiers')
-          .where('id', isEqualTo: user.uid)
-          .get();
+    String? foundMerchantId;
+    String? employeeNumber;
 
-      if (cashiersQuery.docs.isNotEmpty) {
-        final cashierData = cashiersQuery.docs.first.data();
-        return MerchantUser(
-          uid: user.uid,
-          merchantId: cashierData['merchantId'],
-          role: MerchantRole.cashier,
-          cashierData: cashierData,
-        );
-      }
-
-      // 3. Fallback for email login (crNumber-employeeNumber@dualverse.app)
-      if (user.email != null && user.email!.endsWith('@dualverse.app')) {
-        final localPart = user.email!.split('@')[0];
-        final lastDash = localPart.lastIndexOf('-');
-        if (lastDash > 0) {
-          final crNumber = localPart.substring(0, lastDash);
-          
+    // Determine CR Number from email if available
+    if (user.email != null && user.email!.endsWith('@dualverse.app')) {
+      final localPart = user.email!.split('@')[0];
+      final lastDash = localPart.lastIndexOf('-');
+      if (lastDash > 0) {
+        final crNumber = localPart.substring(0, lastDash);
+        employeeNumber = localPart.substring(lastDash + 1);
+        
+        try {
           final merchantsQuery = await firestore
               .collection('merchants')
               .where('crNumber', isEqualTo: crNumber)
               .get();
               
           if (merchantsQuery.docs.isNotEmpty) {
-             return MerchantUser(
-                uid: user.uid,
-                merchantId: merchantsQuery.docs.first.id,
-                role: MerchantRole.cashier,
-             );
+             foundMerchantId = merchantsQuery.docs.first.id;
           }
+        } catch (e) {
+          debugPrint('Error looking up merchant by CR Number: $e');
         }
       }
+    }
 
-      // Unauthorized
+    // 2. Try direct lookup if we have foundMerchantId
+    if (foundMerchantId != null) {
+      try {
+        final cashierDoc = await firestore
+            .collection('merchants')
+            .doc(foundMerchantId)
+            .collection('cashiers')
+            .doc(user.uid)
+            .get();
+
+        if (cashierDoc.exists) {
+          final cashierData = cashierDoc.data();
+          return MerchantUser(
+            uid: user.uid,
+            merchantId: foundMerchantId,
+            role: MerchantRole.cashier,
+            cashierData: cashierData,
+          );
+        }
+      } catch (e) {
+        debugPrint('Error with direct cashier lookup: $e');
+      }
+
+      if (employeeNumber != null) {
+        try {
+          final cashiersQuery = await firestore
+              .collection('merchants')
+              .doc(foundMerchantId)
+              .collection('cashiers')
+              .where('employeeNumber', isEqualTo: employeeNumber)
+              .get();
+
+          if (cashiersQuery.docs.isNotEmpty) {
+            final cashierData = cashiersQuery.docs.first.data();
+            return MerchantUser(
+              uid: user.uid,
+              merchantId: foundMerchantId,
+              role: MerchantRole.cashier,
+              cashierData: cashierData,
+            );
+          }
+        } catch (e) {
+          debugPrint('Error with employee number cashier lookup: $e');
+        }
+      }
+    }
+
+    // 3. Try collectionGroup if direct lookups failed
+    try {
+      final cashiersQuery = await firestore
+          .collectionGroup('cashiers')
+          .where('id', isEqualTo: user.uid)
+          .get();
+
+      if (cashiersQuery.docs.isNotEmpty) {
+        final cashierDoc = cashiersQuery.docs.first;
+        final cashierData = cashierDoc.data();
+        
+        final parentMerchantId = cashierDoc.reference.parent.parent?.id ?? '';
+        final merchantId = (cashierData['merchantId']?.toString().isNotEmpty == true) 
+            ? cashierData['merchantId'] 
+            : parentMerchantId;
+
+        return MerchantUser(
+          uid: user.uid,
+          merchantId: merchantId,
+          role: MerchantRole.cashier,
+          cashierData: cashierData,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error with collectionGroup cashier lookup: $e');
+    }
+
+    // 4. Ultimate Fallback for Cashier
+    if (foundMerchantId != null) {
       return MerchantUser(
         uid: user.uid,
-        merchantId: '',
-        role: MerchantRole.unauthorized,
+        merchantId: foundMerchantId,
+        role: MerchantRole.cashier,
+        cashierData: {
+          'id': user.uid,
+          'merchantId': foundMerchantId,
+          'employeeNumber': employeeNumber ?? 'Unknown',
+          'name': 'Cashier ${employeeNumber ?? ''}'.trim(),
+          'status': 'Active',
+        },
       );
-    } catch (e) {
-      debugPrint('Error getting merchant role: $e');
-      return MerchantUser(uid: user.uid, merchantId: '', role: MerchantRole.unauthorized);
     }
+
+    // Unauthorized
+    return MerchantUser(
+      uid: user.uid,
+      merchantId: '',
+      role: MerchantRole.unauthorized,
+    );
   }
 
   // Login with phone and pin (Legacy/Customer fallback)

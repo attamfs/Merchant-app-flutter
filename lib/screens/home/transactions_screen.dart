@@ -6,7 +6,14 @@ import 'dart:math' as Math;
 import 'package:intl/intl.dart';
 
 class TransactionsScreen extends StatefulWidget {
-  const TransactionsScreen({super.key});
+  final bool isCashier;
+  final String? merchantId;
+
+  const TransactionsScreen({
+    super.key,
+    this.isCashier = false,
+    this.merchantId,
+  });
 
   @override
   State<TransactionsScreen> createState() => _TransactionsScreenState();
@@ -18,6 +25,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   
   // Cache for user profiles
   final Map<String, Map<String, dynamic>> _userCache = {};
+
+  DateTime? _parseDate(Map<String, dynamic> data) {
+    if (data['timestamp'] is Timestamp) return (data['timestamp'] as Timestamp).toDate();
+    if (data['date'] is Timestamp) return (data['date'] as Timestamp).toDate();
+    if (data['createdAt'] is Timestamp) return (data['createdAt'] as Timestamp).toDate();
+    
+    if (data['timestamp'] is String) return DateTime.tryParse(data['timestamp']);
+    if (data['date'] is String) return DateTime.tryParse(data['date']);
+    if (data['createdAt'] is String) return DateTime.tryParse(data['createdAt']);
+    
+    return null;
+  }
 
   void _showTransactionDetails(Map<String, dynamic> data, String id, Map<String, dynamic> userProfile) {
     final amount = (data['totalAmount'] ?? 0).toDouble();
@@ -258,8 +277,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
 
+    final targetMerchantId = widget.isCashier ? (widget.merchantId ?? user.uid) : user.uid;
+    Query streamQuery = _firestore
+        .collection('transactions')
+        .where('merchantId', isEqualTo: targetMerchantId);
+        
+    if (widget.isCashier) {
+      streamQuery = streamQuery.where('cashierId', isEqualTo: user.uid);
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white, // Web app uses white background for lists usually
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: const Text('Transactions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
@@ -267,10 +295,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         elevation: 1,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('transactions')
-            .where('merchantId', isEqualTo: user.uid)
-            .snapshots(),
+        stream: streamQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -285,12 +310,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           transactions.sort((a, b) {
             final aData = a.data() as Map<String, dynamic>;
             final bData = b.data() as Map<String, dynamic>;
-            final aDate = aData['date'] is Timestamp 
-                ? (aData['date'] as Timestamp).toDate() 
-                : (DateTime.tryParse(aData['date']?.toString() ?? '') ?? DateTime.now());
-            final bDate = bData['date'] is Timestamp 
-                ? (bData['date'] as Timestamp).toDate() 
-                : (DateTime.tryParse(bData['date']?.toString() ?? '') ?? DateTime.now());
+            final aDate = _parseDate(aData) ?? DateTime.now();
+            final bDate = _parseDate(bData) ?? DateTime.now();
             return bDate.compareTo(aDate);
           });
 
@@ -318,9 +339,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               final data = doc.data() as Map<String, dynamic>;
               
               final amount = (data['totalAmount'] ?? 0).toDouble();
-              final date = data['date'] is Timestamp 
-                  ? (data['date'] as Timestamp).toDate() 
-                  : (DateTime.tryParse(data['date']?.toString() ?? '') ?? DateTime.now());
+              final date = _parseDate(data) ?? DateTime.now();
                   
               final customerId = data['customerId']?.toString() ?? '';
               
@@ -341,8 +360,20 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       setState(() {
                         _userCache[customerId] = {
                           'name': uData?['name']?.toString() ?? userProfile['name'],
-                          'imageUrl': uData?['imageUrl']?.toString(),
+                          'imageUrl': (uData?['imageUrl'] ?? uData?['avatarUrl'] ?? uData?['photoURL'])?.toString(),
                         };
+                      });
+                    } else if (mounted) {
+                      _firestore.collection('merchants').doc(customerId).get().then((merchantDoc) {
+                        if (merchantDoc.exists && mounted) {
+                          final mData = merchantDoc.data();
+                          setState(() {
+                            _userCache[customerId] = {
+                              'name': mData?['businessName']?.toString() ?? mData?['name']?.toString() ?? userProfile['name'],
+                              'imageUrl': (mData?['imageUrl'] ?? mData?['avatarUrl'] ?? mData?['photoURL'])?.toString(),
+                            };
+                          });
+                        }
                       });
                     }
                   });

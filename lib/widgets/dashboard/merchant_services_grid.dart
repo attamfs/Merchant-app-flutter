@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../widgets/dashboard/incoming_orders_list.dart';
+import '../../screens/home/manage_orders_screen.dart';
 import '../../screens/home/my_store_screen.dart';
 import '../../screens/home/atta_merchants_screen.dart';
 import '../../screens/home/vouchers_screen.dart';
@@ -11,18 +11,27 @@ import '../../screens/home/atta_merchants_screen.dart';
 import '../../screens/home/register_user_screen.dart';
 import '../../screens/home/my_package_screen.dart';
 import '../../screens/home/admin_requests_screen.dart';
-import '../../screens/home/my_store_screen.dart';
 import '../../screens/home/manage_cashiers_screen.dart';
+import '../../screens/home/manage_drivers_screen.dart';
+import '../../screens/home/cashier_sales_screen.dart';
 
 class MerchantServicesGrid extends StatefulWidget {
-  const MerchantServicesGrid({super.key});
+  final bool isCashier;
+  final String? merchantId;
+  final VoidCallback? onEndOfDay;
+
+  const MerchantServicesGrid({
+    super.key,
+    this.isCashier = false,
+    this.merchantId,
+    this.onEndOfDay,
+  });
 
   @override
   State<MerchantServicesGrid> createState() => _MerchantServicesGridState();
 }
 
 class _MerchantServicesGridState extends State<MerchantServicesGrid> {
-  bool _showOrders = false;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +64,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 children: [
-                  if (vis['myStore'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['myStore'] != false) _buildServiceCard(
                     Icons.store, 
                     'My Store',
                     onTap: () {
@@ -65,7 +74,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                       );
                     },
                   ),
-                  if (vis['merchants'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['merchants'] != false) _buildServiceCard(
                     Icons.storefront, 
                     'Atta Merchants',
                     onTap: () {
@@ -75,7 +84,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                       );
                     },
                   ),
-                  if (vis['vouchers'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['vouchers'] != false) _buildServiceCard(
                     Icons.local_activity, 
                     'Vouchers',
                     onTap: () {
@@ -87,11 +96,11 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                   ),
                   if (vis['salesSummary'] != false) _buildServiceCard(
                     Icons.bar_chart, 
-                    'Sales Summary',
+                    widget.isCashier ? 'My Sales' : 'Sales Summary',
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SalesSummaryScreen()),
+                        MaterialPageRoute(builder: (context) => SalesSummaryScreen(isCashier: widget.isCashier, merchantId: widget.merchantId)),
                       );
                     },
                   ),
@@ -101,11 +110,11 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ShiftHistoryScreen()),
+                        MaterialPageRoute(builder: (context) => ShiftHistoryScreen(isCashier: widget.isCashier, merchantId: widget.merchantId)),
                       );
                     },
                   ),
-                  if (vis['promotions'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['promotions'] != false) _buildServiceCard(
                     Icons.card_giftcard, 
                     'Promotions',
                     onTap: () {
@@ -115,7 +124,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                       );
                     },
                   ),
-                  if (vis['registerUser'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['registerUser'] != false) _buildServiceCard(
                     Icons.person_add, 
                     'Register User',
                     onTap: () {
@@ -125,7 +134,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                       );
                     },
                   ),
-                  if (vis['myPackage'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['myPackage'] != false) _buildServiceCard(
                     Icons.card_membership, 
                     'My Package',
                     onTap: () {
@@ -135,7 +144,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                       );
                     },
                   ),
-                  if (vis['adminRequests'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['adminRequests'] != false) _buildServiceCard(
                     Icons.description, 
                     'Admin Requests',
                     onTap: () {
@@ -145,17 +154,37 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                       );
                     },
                   ),
-                  if (vis['manageOrders'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['manageOrders'] != false) _buildServiceCard(
                     Icons.shopping_bag, 
                     'Manage Orders',
                     onTap: () {
-                      setState(() {
-                        _showOrders = !_showOrders;
-                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ManageOrdersScreen()),
+                      );
                     },
                   ),
-                  if (vis['manageDrivers'] != false) _buildServiceCard(Icons.local_shipping, 'Manage Drivers'),
-                  if (vis['manageCashiers'] != false) _buildServiceCard(
+                  if (!widget.isCashier && vis['manageDrivers'] != false) _buildServiceCard(
+                    Icons.local_shipping, 
+                    'Manage Drivers',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ManageDriversScreen()),
+                      );
+                    },
+                  ),
+                  if (!widget.isCashier && vis['cashierSales'] != false) _buildServiceCard(
+                    Icons.receipt_long, 
+                    'Cashier Sales',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => CashierSalesScreen(merchantId: widget.merchantId)),
+                      );
+                    },
+                  ),
+                  if (!widget.isCashier && vis['manageCashiers'] != false) _buildServiceCard(
                     Icons.people, 
                     'Manage Cashiers',
                     onTap: () {
@@ -165,22 +194,16 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                       );
                     },
                   ),
+                  if (widget.isCashier) _buildServiceCard(
+                    Icons.logout,
+                    'End of Day',
+                    onTap: widget.onEndOfDay,
+                  ),
                 ],
               );
             }
           ),
-          if (_showOrders) ...[
-            const SizedBox(height: 24),
-            const Text(
-              'Incoming Orders',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const IncomingOrdersList(),
-          ],
+
         ],
       ),
     );
