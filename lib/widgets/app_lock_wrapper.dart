@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../providers/translation_extension.dart';
 
 class AppLockWrapper extends StatefulWidget {
   final Widget child;
 
-  const AppLockWrapper({super.key, required this.child});
+  AppLockWrapper({super.key, required this.child});
 
   @override
   State<AppLockWrapper> createState() => _AppLockWrapperState();
@@ -123,7 +125,7 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
     
     setState(() { _isVerifying = true; });
     
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(Duration(milliseconds: 300));
     
     if (_pinController.text == _userPin) {
       final prefs = await SharedPreferences.getInstance();
@@ -138,7 +140,7 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Incorrect PIN'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Incorrect PIN'.tr(context)), backgroundColor: Colors.red),
         );
       }
     }
@@ -172,12 +174,12 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
         child: Center(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               child: Card(
                 elevation: 8,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Padding(
-                  padding: const EdgeInsets.all(32.0),
+                  padding: EdgeInsets.all(32.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -190,18 +192,16 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
                         ),
                         child: Icon(Icons.lock, size: 40, color: Theme.of(context).primaryColor),
                       ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'App Locked',
+                      SizedBox(height: 24),
+                      Text('App Locked'.tr(context),
                         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Please enter your PIN to continue.',
+                      SizedBox(height: 8),
+                      Text('Please enter your PIN to continue.'.tr(context),
                         style: TextStyle(color: Colors.grey),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32),
                       TextField(
                         controller: _pinController,
                         onChanged: (val) {
@@ -212,11 +212,11 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
                         maxLength: 4,
                         textAlign: TextAlign.center,
                         enabled: !_isVerifying,
-                        style: const TextStyle(fontSize: 24, letterSpacing: 8),
+                        style: TextStyle(fontSize: 24, letterSpacing: 8),
                         decoration: InputDecoration(
                           counterText: '',
                           hintText: 'Enter 4-digit PIN',
-                          hintStyle: const TextStyle(fontSize: 16, letterSpacing: 0),
+                          hintStyle: TextStyle(fontSize: 16, letterSpacing: 0),
                           suffixIcon: IconButton(
                             icon: Icon(_showPin ? Icons.visibility_off : Icons.visibility),
                             onPressed: () => setState(() => _showPin = !_showPin),
@@ -224,7 +224,7 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
                         height: 48,
@@ -236,16 +236,16 @@ class _AppLockWrapperState extends State<AppLockWrapper> with WidgetsBindingObse
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           child: _isVerifying
-                              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Text('Unlock App', style: TextStyle(fontSize: 18)),
+                              ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : Text('Unlock App'.tr(context), style: TextStyle(fontSize: 18)),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      const Divider(),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 24),
+                      Divider(),
+                      SizedBox(height: 16),
                       TextButton(
                         onPressed: _signOut,
-                        child: const Text('Sign Out', style: TextStyle(color: Colors.grey)),
+                        child: Text('Sign Out'.tr(context), style: TextStyle(color: Colors.grey)),
                       ),
                     ],
                   ),

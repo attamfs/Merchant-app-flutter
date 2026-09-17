@@ -4,9 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -20,23 +22,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Merchant Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Merchant Profile'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: user == null
-          ? const Center(child: Text('Not authenticated'))
+          ? Center(child: Text('Not authenticated'.tr(context)))
           : StreamBuilder<DocumentSnapshot>(
               stream: FirebaseFirestore.instance.collection('merchants').doc(user!.uid).snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
 
                 if (!snapshot.hasData || !snapshot.data!.exists) {
-                  return const Center(child: Text('Profile not found'));
+                  return Center(child: Text('Profile not found'.tr(context)));
                 }
 
                 final data = snapshot.data!.data() as Map<String, dynamic>;
@@ -61,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 final String fullCr = branchNumber.isNotEmpty ? '$crNumber-$branchNumber' : crNumber;
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0),
                   child: Column(
                     children: [
                       // Header
@@ -69,19 +71,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           CircleAvatar(
                             radius: 48,
-                            backgroundColor: const Color(0xFF1EBB5E).withOpacity(0.1),
+                            backgroundColor: Color(0xFF1EBB5E).withOpacity(0.1),
                             backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
                             child: imageUrl.isEmpty
                                 ? Text(businessName.isNotEmpty ? businessName[0].toUpperCase() : 'M', 
-                                    style: const TextStyle(fontSize: 32, color: Color(0xFF1EBB5E), fontWeight: FontWeight.bold))
+                                    style: TextStyle(fontSize: 32, color: Color(0xFF1EBB5E), fontWeight: FontWeight.bold))
                                 : null,
                           ),
-                          const SizedBox(height: 16),
-                          Text(businessName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 16),
+                          Text(businessName, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                           Text(contactEmail, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                         ],
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32),
 
                       // Primary Information
                       _buildInfoCard('Primary Information', [
@@ -94,19 +96,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildInfoRow(Icons.phone, 'Mobile Number', phone),
                         _buildInfoRow(Icons.calendar_today, 'Date Joined', dateJoined, isLast: true),
                       ]),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
 
                       // Business Details
                       _buildInfoCard('Business Details', [
                         _buildInfoRow(Icons.store, 'Merchant Type', businessType),
-                        _buildInfoRow(Icons.category, 'Category / Cuisine', category),
+                        _buildInfoRow(Icons.category, 'Category Cuisine', category),
                         _buildInfoRow(Icons.attach_money, 'Price Range', priceRange),
                         if (deliveryModel == 'hybrid')
                           _buildInfoRow(Icons.delivery_dining, 'Delivery Model', 'Hybrid Dynamic (Zone + Distance)', isLast: true)
                         else
                           _buildInfoRow(Icons.delivery_dining, 'Delivery Price', '${deliveryPrice.toStringAsFixed(3)} BHD', isLast: true),
                       ]),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
 
                       // Address
                       _buildInfoCard('Address', [
@@ -120,12 +122,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.symmetric(vertical: 16),
                                 child: Divider(),
                               ),
-                              const Text('Saved Map', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey)),
-                              const SizedBox(height: 12),
+                              Text('Saved Map'.tr(context), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey)),
+                              SizedBox(height: 12),
                               Container(
                                 width: double.infinity,
                                 height: 150,
@@ -162,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ], onEdit: () {
                         _showEditAddressDialog(context, address, user!.uid);
                       }),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                     ],
                   ),
                 );
@@ -173,13 +175,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildSectionHeader(String title, {VoidCallback? onEdit}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0, right: 4.0),
+      padding: EdgeInsets.only(bottom: 8.0, left: 4.0, right: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -187,11 +189,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (onEdit != null)
             TextButton.icon(
               onPressed: onEdit,
-              icon: const Icon(Icons.edit, size: 16, color: Colors.black87),
-              label: const Text('Edit', style: TextStyle(color: Colors.black87)),
+              icon: Icon(Icons.edit, size: 16, color: Colors.black87),
+              label: Text('Edit'.tr(context), style: TextStyle(color: Colors.black87)),
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
-                minimumSize: const Size(50, 30),
+                minimumSize: Size(50, 30),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
@@ -207,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }
@@ -230,9 +232,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (context, setState) {
             return Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              insetPadding: const EdgeInsets.all(16),
+              insetPadding: EdgeInsets.all(16),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 width: 400,
                 child: SingleChildScrollView(
                   child: Column(
@@ -242,54 +244,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Column(
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Edit Address', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                              Text('Update your location', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text('Edit Address'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              Text('Update your location'.tr(context), style: TextStyle(color: Colors.grey, fontSize: 12)),
                             ],
                           ),
                           IconButton(
-                            icon: const Icon(Icons.close),
+                            icon: Icon(Icons.close),
                             onPressed: () => Navigator.pop(context),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(child: _buildTextField('Shop No.', flatController)),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Expanded(child: _buildTextField('Building', buildingController)),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(child: _buildTextField('Street', streetController)),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Expanded(child: _buildTextField('Block', blockController)),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(child: _buildTextField('Area', cityController)),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Expanded(child: _buildTextField('Country', countryController)),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       _buildTextField('Google Map Link', mapLinkController),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+                            child: Text('Cancel'.tr(context), style: TextStyle(color: Colors.black)),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: isSaving ? null : () async {
                               setState(() => isSaving = true);
@@ -310,18 +312,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               } catch (e) {
                                 setState(() => isSaving = false);
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: \$e')));
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: \$e'.tr(context))));
                                 }
                               }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             ),
                             child: isSaving
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : const Text('Save Changes', style: TextStyle(color: Colors.white)),
+                                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                : Text('Save Changes'.tr(context), style: TextStyle(color: Colors.white)),
                           ),
                         ],
                       ),
@@ -346,11 +348,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -358,8 +360,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                title,
-                style: const TextStyle(
+                title.tr(context),
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -367,17 +369,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (onEdit != null)
                 TextButton.icon(
                   onPressed: onEdit,
-                  icon: const Icon(Icons.edit, size: 16, color: Colors.black87),
-                  label: const Text('Edit', style: TextStyle(color: Colors.black87)),
+                  icon: Icon(Icons.edit, size: 16, color: Colors.black87),
+                  label: Text('Edit'.tr(context), style: TextStyle(color: Colors.black87)),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
-                    minimumSize: const Size(50, 30),
+                    minimumSize: Size(50, 30),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ...children,
         ],
       ),
@@ -391,14 +393,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: Colors.grey, size: 20),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                const SizedBox(height: 2),
-                Text(value.isEmpty ? '-' : value, style: const TextStyle(fontWeight: FontWeight.w500)),
+                Text(label.tr(context), style: TextStyle(color: Colors.grey, fontSize: 12)),
+                SizedBox(height: 2),
+                Text(value.isEmpty ? '-' : value, style: TextStyle(fontWeight: FontWeight.w500)),
               ],
             ),
           ),
@@ -410,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 class SavedMapPreview extends StatefulWidget {
   final String googleMapLink;
-  const SavedMapPreview({super.key, required this.googleMapLink});
+  SavedMapPreview({super.key, required this.googleMapLink});
 
   @override
   State<SavedMapPreview> createState() => _SavedMapPreviewState();

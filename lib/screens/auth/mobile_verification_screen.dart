@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class MobileVerificationScreen extends StatefulWidget {
-  const MobileVerificationScreen({super.key});
+  MobileVerificationScreen({super.key});
 
   @override
   State<MobileVerificationScreen> createState() => _MobileVerificationScreenState();
@@ -42,13 +44,13 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
     });
 
     // Simulate network delay
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 1), () {
       setState(() {
         _isLoading = false;
         _otpSent = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP Sent! (Use 123456 in test mode)')),
+        SnackBar(content: Text('OTP Sent! (Use 123456 in test mode)'.trRead(context))),
       );
     });
   }
@@ -57,7 +59,7 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
     final otp = _otpController.text.trim();
     if (otp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a 6-digit OTP')),
+        SnackBar(content: Text('Please enter a 6-digit OTP'.trRead(context))),
       );
       return;
     }
@@ -67,20 +69,27 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
     });
 
     // Simulate verification
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 1), () {
       setState(() {
         _isLoading = false;
       });
       
       if (_testMode && otp != '123456') {
          ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid test OTP. Use 123456.')),
+          SnackBar(content: Text('Invalid test OTP. Use 123456.'.trRead(context))),
         );
         return;
       }
 
-      // Navigate to Set PIN screen
-      Navigator.pushReplacementNamed(context, '/set-pin');
+      // Navigate to Registration Form with verified phone
+      Navigator.pushReplacementNamed(
+        context,
+        '/register-form',
+        arguments: {
+          'phone': _phoneController.text.trim(),
+          'countryCode': _selectedCountryCode,
+        },
+      );
     });
   }
 
@@ -92,7 +101,7 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -110,30 +119,30 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 
                 // Title
                 Text(
-                  _otpSent ? 'Enter OTP' : 'Mobile Verification',
-                  style: const TextStyle(
+                  _otpSent ? 'Enter OTP'.tr(context) : 'Mobile Verification'.tr(context),
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 
                 // Subtitle
                 Text(
-                  _otpSent 
-                      ? 'Enter the 6-digit code sent to your mobile'
-                      : 'Enter your mobile number to receive a verification code',
+                  _otpSent
+                      ? 'Enter the 6-digit code sent to your mobile number'.tr(context)
+                      : 'Enter your mobile number to receive a verification code'.tr(context),
                   style: TextStyle(
                     fontSize: 14,
                     color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Test Mode Toggle (visible only before sending OTP)
                 if (!_otpSent)
@@ -148,26 +157,25 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                           });
                         },
                       ),
-                      const Text('Test Mode'),
+                      Text('Test Mode'.tr(context)),
                     ],
                   ),
                 
                 if (_testMode && !_otpSent)
                   Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: EdgeInsets.all(12),
+                    margin: EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
                       border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.1)),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Icon(Icons.info_outline, size: 20),
                         SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            'Test Mode Active. You can use any phone number and enter 123456 as the OTP.',
+                          child: Text('Test Mode Active. You can use any phone number and enter 123456 as the OTP.'.tr(context),
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -175,7 +183,7 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                     ),
                   ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 if (!_otpSent) ...[
                   // Phone Input Row
@@ -183,13 +191,13 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                     children: [
                       // Country Code Dropdown
                       Container(
-                        width: 100,
+                        width: 120,
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
                           border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.1)),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedCountryCode,
@@ -197,7 +205,7 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                             items: _countryCodes.map((code) {
                               return DropdownMenuItem(
                                 value: code,
-                                child: Text(code, style: const TextStyle(fontSize: 14)),
+                                child: Text('${{'+973':'🇧🇭','+966':'🇸🇦','+974':'🇶🇦','+965':'🇰🇼','+968':'🇴🇲','+971':'🇦🇪'}[code] ?? ""} \u200E$code', textDirection: TextDirection.ltr, style: TextStyle(fontSize: 14)),
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -216,12 +224,12 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       // Phone Number Field
                       Expanded(
                         child: CustomTextField(
                           controller: _phoneController,
-                          hintText: 'Mobile Number',
+                          hintText: 'Mobile Number'.tr(context),
                           keyboardType: TextInputType.phone,
                           maxLength: _selectedCountryCode == '+973' ? 8 : 15,
                           errorText: _phoneErrorText,
@@ -246,9 +254,9 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   CustomButton(
-                    text: 'Send OTP',
+                    text: 'Send OTP'.tr(context),
                     isLoading: _isLoading,
                     onPressed: _sendOtp,
                   ),
@@ -256,34 +264,32 @@ class _MobileVerificationScreenState extends State<MobileVerificationScreen> {
                   // OTP Input
                   CustomTextField(
                     controller: _otpController,
-                    hintText: 'Enter 6-digit OTP',
+                    hintText: 'Enter 6-digit OTP'.tr(context),
                     keyboardType: TextInputType.number,
                     maxLength: 6,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   CustomButton(
-                    text: 'Verify & Continue',
+                    text: 'Verify & Continue'.tr(context),
                     isLoading: _isLoading,
                     onPressed: _verifyOtp,
                   ),
                 ],
                 
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
 
                 // Links
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Already have an account? ',
+                    Text('Already have an account? '.tr(context),
                       style: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacementNamed(context, '/login');
                       },
-                      child: Text(
-                        'Log In',
+                      child: Text('Log In'.tr(context),
                         style: TextStyle(color: theme.colorScheme.primary),
                       ),
                     ),

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class CashierSalesScreen extends StatefulWidget {
   final String? merchantId;
 
-  const CashierSalesScreen({
+  CashierSalesScreen({
     super.key,
     this.merchantId,
   });
@@ -23,7 +25,7 @@ class _CashierSalesScreenState extends State<CashierSalesScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     final targetMerchantId = widget.merchantId ?? user.uid;
@@ -36,7 +38,7 @@ class _CashierSalesScreenState extends State<CashierSalesScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Cashier Sales', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Cashier Sales'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -45,7 +47,7 @@ class _CashierSalesScreenState extends State<CashierSalesScreen> {
         stream: streamQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -64,17 +66,17 @@ class _CashierSalesScreenState extends State<CashierSalesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.history, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  const Text('No Cashier Sales Found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text('There are no closed shift records yet.', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                  SizedBox(height: 16),
+                  Text('No Cashier Sales Found'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text('There are no closed shift records yet.'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             itemCount: shifts.length,
             itemBuilder: (context, index) {
               final shift = shifts[index];
@@ -88,67 +90,76 @@ class _CashierSalesScreenState extends State<CashierSalesScreen> {
               final transactionCount = shift['transactionCount'] ?? 0;
 
               return Card(
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                                child: Icon(Icons.person, color: Theme.of(context).primaryColor),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(cashierName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                  if (counterNumber != null)
-                                    Text('Counter: $counterNumber', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                ],
-                              ),
-                            ],
+                          Expanded(
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                  child: Icon(Icons.person, color: Theme.of(context).primaryColor),
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        cashierName, 
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (counterNumber != null)
+                                        Text('Counter: $counterNumber'.tr(context), style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Text(formattedDate, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                SizedBox(width: 4),
+                                Text(formattedDate, style: TextStyle(fontSize: 12, color: Colors.grey)),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      const Divider(height: 24),
+                      Divider(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Total Digital Sales', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Text('${totalDigitalSales.toStringAsFixed(3)} BHD', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green)),
+                              Text('Total Digital Sales'.tr(context), style: TextStyle(color: Colors.grey, fontSize: 13)),
+                              SizedBox(height: 4),
+                              Text('${totalDigitalSales.toStringAsFixed(3)} BHD', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green)),
                             ],
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text('Transactions', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Text('$transactionCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                              Text('Transactions'.tr(context), style: TextStyle(color: Colors.grey, fontSize: 13)),
+                              SizedBox(height: 4),
+                              Text('$transactionCount'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                             ],
                           ),
                         ],

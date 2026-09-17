@@ -2,28 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/merchant_user.dart';
 import '../../services/merchant_service.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class MerchantSummary extends StatelessWidget {
   final MerchantUser merchantUser;
   
-  const MerchantSummary({super.key, required this.merchantUser});
+  MerchantSummary({super.key, required this.merchantUser});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Today's Overview",
+          Text("Today's Overview".tr(context),
             style: TextStyle(
               color: Colors.blueGrey,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildDataRow(),
         ],
       ),
@@ -64,25 +65,25 @@ class MerchantSummary extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildSummaryCard(
-                    title: 'Sales',
-                    value: '${totalSales.toStringAsFixed(3)} BD',
+                    title: 'Sales'.tr(context),
+                    value: '${totalSales.toStringAsFixed(3)} ${'BD'.tr(context)}',
                     icon: Icons.show_chart,
                     iconColor: Colors.blue,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: _buildSummaryCard(
-                    title: 'Trans.',
+                    title: 'Trans.'.tr(context),
                     value: '$txCount',
                     icon: Icons.show_chart_outlined, // Placeholder for pulse icon
                     iconColor: Colors.green,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: _buildSummaryCard(
-                    title: 'Orders',
+                    title: 'Orders'.tr(context),
                     value: '$orderCount',
                     icon: Icons.shopping_cart_outlined,
                     iconColor: Colors.orange,
@@ -103,7 +104,7 @@ class MerchantSummary extends StatelessWidget {
     required Color iconColor,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
@@ -113,19 +114,19 @@ class MerchantSummary extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: iconColor, size: 24),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.grey,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.black87,

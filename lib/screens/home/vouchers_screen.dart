@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class VouchersScreen extends StatefulWidget {
-  const VouchersScreen({super.key});
+  VouchersScreen({super.key});
 
   @override
   State<VouchersScreen> createState() => _VouchersScreenState();
@@ -18,13 +20,13 @@ class _VouchersScreenState extends State<VouchersScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('My Vouchers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('My Vouchers'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -39,11 +41,11 @@ class _VouchersScreenState extends State<VouchersScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading vouchers'));
+            return Center(child: Text('Error loading vouchers'.tr(context)));
           }
 
           final vouchers = snapshot.data?.docs.map((d) {
@@ -70,17 +72,17 @@ class _VouchersScreenState extends State<VouchersScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.confirmation_num_outlined, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  const Text('No Vouchers Found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text('You have not created any vouchers yet.', style: TextStyle(color: Colors.grey[600])),
+                  SizedBox(height: 16),
+                  Text('No Vouchers Found'.tr(context), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text('You have not created any vouchers yet.'.tr(context), style: TextStyle(color: Colors.grey[600])),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             itemCount: vouchers.length,
             itemBuilder: (context, index) {
               final voucher = vouchers[index];
@@ -107,11 +109,11 @@ class _VouchersScreenState extends State<VouchersScreen> {
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -130,25 +132,25 @@ class _VouchersScreenState extends State<VouchersScreen> {
                     ? Image.network(
                         imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, color: Colors.grey),
+                        errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported, color: Colors.grey),
                       )
-                    : const Icon(Icons.image, color: Colors.grey),
+                    : Icon(Icons.image, color: Colors.grey),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             // Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
+                  Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
                   Text('Value: ${value.toStringAsFixed(3)} BHD', style: TextStyle(color: Colors.grey[700], fontSize: 14)),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   _buildDetailRow('Quantity:', quantity.toString()),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   _buildDetailRow('Created On:', DateFormat('MMM d, yyyy').format(createdAt)),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   _buildDetailRow('Validity:', 'Valid for $durationDays days after purchase'),
                 ],
               ),
@@ -163,8 +165,8 @@ class _VouchersScreenState extends State<VouchersScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-        const SizedBox(width: 4),
+        Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        SizedBox(width: 4),
         Expanded(child: Text(value, style: TextStyle(color: Colors.grey[600], fontSize: 12))),
       ],
     );

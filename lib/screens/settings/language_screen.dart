@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/language_provider.dart';
+import '../../providers/translation_provider.dart';
 
 class LanguageScreen extends StatelessWidget {
-  const LanguageScreen({super.key});
+  LanguageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<TranslationProvider>().t;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Language', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
+        title: Text(t('Language', defaultEn: 'Language'), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Consumer<LanguageProvider>(
         builder: (context, languageProvider, child) {
           return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
               _buildLanguageItem(context, languageProvider, 'English', 'en'),
               _buildLanguageItem(context, languageProvider, 'العربية', 'ar'),
@@ -39,13 +41,13 @@ class LanguageScreen extends StatelessWidget {
         provider.setLanguage(value);
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade200),
           color: isSelected ? Colors.green.withOpacity(0.1) : Colors.white,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -58,7 +60,7 @@ class LanguageScreen extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check, color: Colors.green),
+              Icon(Icons.check, color: Colors.green),
           ],
         ),
       ),

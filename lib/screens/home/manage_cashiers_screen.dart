@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ManageCashiersScreen extends StatefulWidget {
-  const ManageCashiersScreen({super.key});
+  ManageCashiersScreen({super.key});
 
   @override
   State<ManageCashiersScreen> createState() => _ManageCashiersScreenState();
@@ -49,7 +51,7 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
 
     final num = int.tryParse(_countersController.text);
     if (num == null || num < 1) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid number of counters')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please enter a valid number of counters'.tr(context))));
       return;
     }
 
@@ -59,11 +61,11 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
         'numberOfCounters': num,
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Counters updated successfully')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Counters updated successfully'.tr(context))));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update counters: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to update counters: $e'.tr(context))));
       }
     } finally {
       if (mounted) {
@@ -119,11 +121,11 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cashier created successfully')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cashier created successfully'.tr(context))));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'.tr(context))));
       }
     } finally {
       if (mounted) {
@@ -139,24 +141,24 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('Add New Cashier'),
+              title: Text('Add New Cashier'.tr(context)),
               content: Form(
                 key: _formKey,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Employee Name'),
+                      decoration: InputDecoration(labelText: 'Employee Name'),
                       validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                       onSaved: (v) => _employeeName = v ?? '',
                     ),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Employee Number (e.g. 1001)'),
+                      decoration: InputDecoration(labelText: 'Employee Number (e.g. 1001)'),
                       validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                       onSaved: (v) => _employeeNumber = v ?? '',
                     ),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Password (Min 6 chars)'),
+                      decoration: InputDecoration(labelText: 'Password (Min 6 chars)'),
                       obscureText: true,
                       validator: (v) => v == null || v.length < 6 ? 'Min 6 chars' : null,
                       onSaved: (v) => _password = v ?? '',
@@ -167,7 +169,7 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text('Cancel'.tr(context)),
                 ),
                 ElevatedButton(
                   onPressed: _isCreating ? null : () async {
@@ -175,7 +177,7 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                     await _createCashier();
                     setDialogState(() => _isCreating = false);
                   },
-                  child: _isCreating ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Create'),
+                  child: _isCreating ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : Text('Create'.tr(context)),
                 ),
               ],
             );
@@ -194,11 +196,11 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
         'status': currentStatus == 'Active' ? 'Inactive' : 'Active',
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Status updated')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Status updated'.tr(context))));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating status: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating status: $e'.tr(context))));
       }
     }
   }
@@ -207,34 +209,34 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Manage Cashiers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Manage Cashiers'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: Icon(Icons.add),
             onPressed: _showAddCashierDialog,
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
             // Store Configuration
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,11 +244,11 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                   Row(
                     children: [
                       Icon(Icons.monitor, size: 20, color: Colors.grey[700]),
-                      const SizedBox(width: 8),
-                      const Text('Store Configuration', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      SizedBox(width: 8),
+                      Text('Store Configuration'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -254,14 +256,14 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Total Checkout Counters', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                            const SizedBox(height: 4),
+                            Text('Total Checkout Counters'.tr(context), style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                            SizedBox(height: 4),
                             SizedBox(
                               height: 40,
                               child: TextField(
                                 controller: _countersController,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(horizontal: 12),
                                   hintText: 'e.g. 3',
@@ -271,7 +273,7 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       SizedBox(
                         height: 40,
                         child: ElevatedButton(
@@ -281,7 +283,7 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          child: _isSavingCounters ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Save'),
+                          child: _isSavingCounters ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text('Save'.tr(context)),
                         ),
                       ),
                     ],
@@ -289,14 +291,14 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             
             // Cashiers List
             StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('merchants').doc(user.uid).collection('cashiers').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()));
+                  return Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator()));
                 }
 
                 if (snapshot.hasError) {
@@ -308,14 +310,14 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                 if (cashiers.isEmpty) {
                   return Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(32.0),
+                      padding: EdgeInsets.all(32.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.people, size: 48, color: Colors.grey[400]),
-                          const SizedBox(height: 16),
-                          Text('No cashiers found.', style: TextStyle(color: Colors.grey[600])),
-                          Text('Click the + button above to add one.', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                          SizedBox(height: 16),
+                          Text('No cashiers found.'.tr(context), style: TextStyle(color: Colors.grey[600])),
+                          Text('Click the + button above to add one.'.tr(context), style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                         ],
                       ),
                     ),
@@ -324,7 +326,7 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
 
                 return ListView.builder(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: cashiers.length,
                   itemBuilder: (context, index) {
                     final doc = cashiers[index];
@@ -334,12 +336,12 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                     final status = data['status'] ?? 'Active';
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
+                      margin: EdgeInsets.only(bottom: 12),
+                      padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
                       ),
                       child: Row(
                         children: [
@@ -350,15 +352,15 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                               color: Colors.green.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.people, color: Colors.green, size: 20),
+                            child: Icon(Icons.people, color: Colors.green, size: 20),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                Text('Emp: $employeeNumber', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                                Text(name, style: TextStyle(fontWeight: FontWeight.bold)),
+                                Text('Emp: $employeeNumber'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                               ],
                             ),
                           ),
@@ -366,7 +368,7 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: status == 'Active' ? Colors.green[100] : Colors.red[100],
                                   borderRadius: BorderRadius.circular(12),
@@ -380,15 +382,15 @@ class _ManageCashiersScreenState extends State<ManageCashiersScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
                               SizedBox(
                                 height: 28,
                                 child: OutlinedButton(
                                   onPressed: () => _toggleStatus(doc.id, status),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    padding: EdgeInsets.symmetric(horizontal: 8),
                                   ),
-                                  child: const Text('Toggle Status', style: TextStyle(fontSize: 10)),
+                                  child: Text('Toggle Status'.tr(context), style: TextStyle(fontSize: 10)),
                                 ),
                               ),
                             ],

@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'dashboard_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   final String transactionId;
 
-  const PaymentSuccessScreen({super.key, required this.transactionId});
+  PaymentSuccessScreen({super.key, required this.transactionId});
 
   @override
   State<PaymentSuccessScreen> createState() => _PaymentSuccessScreenState();
@@ -116,13 +118,13 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     if (_isLoading) {
       return Scaffold(
         backgroundColor: Colors.grey[100],
-        body: const Center(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('Finalizing your payment...', style: TextStyle(color: Colors.grey)),
+              Text('Finalizing your payment...'.tr(context), style: TextStyle(color: Colors.grey)),
             ],
           ),
         ),
@@ -132,7 +134,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Payment Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Payment Status'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -140,7 +142,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.0),
           child: _error != null
               ? _buildErrorCard()
               : _buildSuccessCard(),
@@ -151,7 +153,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
 
   Widget _buildErrorCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.red[50],
         borderRadius: BorderRadius.circular(16),
@@ -160,24 +162,24 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 64),
-          const SizedBox(height: 16),
-          const Text('Payment Error', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red)),
-          const SizedBox(height: 8),
-          Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
-          const SizedBox(height: 24),
+          Icon(Icons.error_outline, color: Colors.red, size: 64),
+          SizedBox(height: 16),
+          Text('Payment Error'.tr(context), style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red)),
+          SizedBox(height: 8),
+          Text(_error!, textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
+          SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+              MaterialPageRoute(builder: (_) => DashboardScreen()),
               (route) => false,
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
+              minimumSize: Size(double.infinity, 48),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Go to Home', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text('Go to Home'.tr(context), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -188,42 +190,42 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     final amount = (_transactionDetails?['totalAmount'] ?? 0.0).toDouble();
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 5)),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.check_circle, color: Colors.green, size: 80),
-          const SizedBox(height: 16),
-          const Text('Payment Successful!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          const Text('Your subscription has been upgraded.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 32),
+          Icon(Icons.check_circle, color: Colors.green, size: 80),
+          SizedBox(height: 16),
+          Text('Payment Successful!'.tr(context), style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          SizedBox(height: 8),
+          Text('Your subscription has been upgraded.'.tr(context), textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+          SizedBox(height: 32),
           _buildDetailRow('Amount Paid', 'BHD ${amount.toStringAsFixed(3)}'),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
+          Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
           _buildDetailRow('Transaction ID', widget.transactionId, isMono: true),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
+          Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
           _buildDetailRow('Date', DateFormat('PPp').format(DateTime.now())),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+              MaterialPageRoute(builder: (_) => DashboardScreen()),
               (route) => false,
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
+              minimumSize: Size(double.infinity, 48),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
-            child: const Text('Home Page', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text('Home Page'.tr(context), style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -234,7 +236,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(label, style: TextStyle(color: Colors.grey)),
         Flexible(
           child: Text(
             value,

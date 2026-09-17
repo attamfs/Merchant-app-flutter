@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ShiftHistoryScreen extends StatefulWidget {
   final bool isCashier;
   final String? merchantId;
 
-  const ShiftHistoryScreen({
+  ShiftHistoryScreen({
     super.key,
     this.isCashier = false,
     this.merchantId,
@@ -25,7 +27,7 @@ class _ShiftHistoryScreenState extends State<ShiftHistoryScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     final targetMerchantId = widget.isCashier ? (widget.merchantId ?? user.uid) : user.uid;
@@ -41,7 +43,7 @@ class _ShiftHistoryScreenState extends State<ShiftHistoryScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Shift History', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Shift History'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -50,7 +52,7 @@ class _ShiftHistoryScreenState extends State<ShiftHistoryScreen> {
         stream: streamQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -75,17 +77,17 @@ class _ShiftHistoryScreenState extends State<ShiftHistoryScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.history, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  const Text('No Shift History Found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text('There are no closed shift records in the history.', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                  SizedBox(height: 16),
+                  Text('No Shift History Found'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text('There are no closed shift records in the history.'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             itemCount: shifts.length,
             itemBuilder: (context, index) {
               final shift = shifts[index];
@@ -207,7 +209,7 @@ class _ShiftItemState extends State<_ShiftItem> {
 
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -218,7 +220,7 @@ class _ShiftItemState extends State<_ShiftItem> {
               _fetchDetails();
             }
           },
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          tilePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           title: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -228,23 +230,23 @@ class _ShiftItemState extends State<_ShiftItem> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.schedule, size: 16, color: Colors.green),
-                        const SizedBox(width: 8),
+                        Icon(Icons.schedule, size: 16, color: Colors.green),
+                        SizedBox(width: 8),
                         Text(
                           DateFormat('MMM d, yyyy • h:mm a').format(closingTime),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.person, size: 12, color: Colors.grey),
-                        const SizedBox(width: 4),
+                        Icon(Icons.person, size: 12, color: Colors.grey),
+                        SizedBox(width: 4),
                         Text(cashierName, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                         if (counterNumber != null) ...[
-                          const SizedBox(width: 8),
-                          Text('Counter: $counterNumber', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                          SizedBox(width: 8),
+                          Text('Counter: $counterNumber'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                         ],
                       ],
                     ),
@@ -254,8 +256,8 @@ class _ShiftItemState extends State<_ShiftItem> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('${totalSales.toStringAsFixed(3)} BHD', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.green)),
-                  Text('$count Txns', style: TextStyle(color: Colors.grey[600], fontSize: 10)),
+                  Text('${totalSales.toStringAsFixed(3)} BHD', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.green)),
+                  Text("$count ${'Txns'.tr(context)}", style: TextStyle(color: Colors.grey[600], fontSize: 10)),
                 ],
               ),
             ],
@@ -263,64 +265,64 @@ class _ShiftItemState extends State<_ShiftItem> {
           children: [
             Container(
               color: Colors.grey[50],
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Total Sales Block
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[200]!)),
                     child: Column(
                       children: [
-                        Text('${totalSales.toStringAsFixed(3)} BHD', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text('Total Digital Sales', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                        Text('${totalSales.toStringAsFixed(3)} BHD', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text('Total Digital Sales'.tr(context), style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   // Breakdown Block
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[200]!)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Payment Breakdown', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        const SizedBox(height: 12),
+                        Text('Payment Breakdown'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        SizedBox(height: 12),
                         if (_isLoading)
-                          const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()))
+                          Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()))
                         else if (_breakdown.isEmpty)
-                          Text('No payment breakdown available.', style: TextStyle(color: Colors.grey[500], fontSize: 12, fontStyle: FontStyle.italic))
+                          Text('No payment breakdown available.'.tr(context), style: TextStyle(color: Colors.grey[500], fontSize: 12, fontStyle: FontStyle.italic))
                         else
                           ..._breakdown.entries.map((e) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
+                                padding: EdgeInsets.only(bottom: 8.0),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(e.key, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                                    Text('${e.value.toStringAsFixed(3)} BHD', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                    Text('${e.value.toStringAsFixed(3)} BHD', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                                   ],
                                 ),
                               )),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   // Transactions Block
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[200]!)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Transactions List', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                        const SizedBox(height: 12),
+                        Text('Transactions List'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        SizedBox(height: 12),
                         if (_isLoading)
-                          const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()))
+                          Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()))
                         else if (_transactions.isEmpty)
-                          Text('No transactions recorded for this shift.', style: TextStyle(color: Colors.grey[500], fontSize: 12, fontStyle: FontStyle.italic))
+                          Text('No transactions recorded for this shift.'.tr(context), style: TextStyle(color: Colors.grey[500], fontSize: 12, fontStyle: FontStyle.italic))
                         else
                           ..._transactions.map((tx) {
                             final txDate = (tx['date'] as Timestamp?)?.toDate() ?? DateTime.now();
@@ -336,21 +338,20 @@ class _ShiftItemState extends State<_ShiftItem> {
                             }
 
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
+                              padding: EdgeInsets.only(bottom: 12.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        'Customer', 
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                      Text('Customer'.tr(context), 
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                                       ),
-                                      Text('${amount.toStringAsFixed(3)} BHD', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.green)),
+                                      Text('${amount.toStringAsFixed(3)} BHD', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.green)),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [

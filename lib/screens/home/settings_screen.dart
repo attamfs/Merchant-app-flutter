@@ -5,22 +5,24 @@ import '../settings/language_screen.dart';
 import '../settings/system_config_screen.dart';
 import '../settings/about_screen.dart';
 import '../settings/support_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Settings'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Container(
@@ -33,38 +35,38 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   _buildSettingsItem(
                     icon: Icons.person,
-                    title: 'Account',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountScreen())),
+                    title: 'Account'.tr(context),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AccountScreen())),
                   ),
-                  const Divider(height: 1),
+                  Divider(height: 1),
                   _buildSettingsItem(
                     icon: Icons.language,
-                    title: 'Language',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LanguageScreen())),
+                    title: 'Language'.tr(context),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LanguageScreen())),
                   ),
-                  const Divider(height: 1),
+                  Divider(height: 1),
                   _buildSettingsItem(
                     icon: Icons.settings_system_daydream,
-                    title: 'System Configuration',
+                    title: 'System Configuration'.tr(context),
                     iconColor: Colors.blue[600],
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SystemConfigScreen())),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SystemConfigScreen())),
                   ),
-                  const Divider(height: 1),
+                  Divider(height: 1),
                   _buildSettingsItem(
                     icon: Icons.info,
-                    title: 'About App',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen())),
+                    title: 'About App'.tr(context),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AboutScreen())),
                   ),
-                  const Divider(height: 1),
+                  Divider(height: 1),
                   _buildSettingsItem(
                     icon: Icons.message,
-                    title: 'Support',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportScreen())),
+                    title: 'Support'.tr(context),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SupportScreen())),
                   ),
-                  const Divider(height: 1),
+                  Divider(height: 1),
                   _buildSettingsItem(
                     icon: Icons.logout,
-                    title: 'Logout',
+                    title: 'Logout'.tr(context),
                     iconColor: Colors.red,
                     textColor: Colors.red,
                     onTap: () async {
@@ -77,9 +79,8 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
-            Text(
-              'uatatta 1.01',
+            SizedBox(height: 32),
+            Text('uatatta 1.01',
               style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
           ],
@@ -101,14 +102,14 @@ class SettingsScreen extends StatelessWidget {
         title,
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: textColor),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+      trailing: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
       onTap: onTap,
     );
   }
 
   void _showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature Settings Coming Soon!')),
+      SnackBar(content: Text('$feature Settings Coming Soon!'.tr(context))),
     );
   }
 }

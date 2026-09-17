@@ -14,10 +14,13 @@ class AuthService {
 
   Future<MerchantUser?> getMerchantUser(User user) async {
     final firestore = FirebaseFirestore.instance;
-    
+
     // 1. Check if Supervisor (roles_merchants)
     try {
-      final supervisorDoc = await firestore.collection('roles_merchants').doc(user.uid).get();
+      final supervisorDoc = await firestore
+          .collection('roles_merchants')
+          .doc(user.uid)
+          .get();
       if (supervisorDoc.exists) {
         return MerchantUser(
           uid: user.uid,
@@ -39,15 +42,15 @@ class AuthService {
       if (lastDash > 0) {
         final crNumber = localPart.substring(0, lastDash);
         employeeNumber = localPart.substring(lastDash + 1);
-        
+
         try {
           final merchantsQuery = await firestore
               .collection('merchants')
               .where('crNumber', isEqualTo: crNumber)
               .get();
-              
+
           if (merchantsQuery.docs.isNotEmpty) {
-             foundMerchantId = merchantsQuery.docs.first.id;
+            foundMerchantId = merchantsQuery.docs.first.id;
           }
         } catch (e) {
           debugPrint('Error looking up merchant by CR Number: $e');
@@ -112,10 +115,11 @@ class AuthService {
       if (cashiersQuery.docs.isNotEmpty) {
         final cashierDoc = cashiersQuery.docs.first;
         final cashierData = cashierDoc.data();
-        
+
         final parentMerchantId = cashierDoc.reference.parent.parent?.id ?? '';
-        final merchantId = (cashierData['merchantId']?.toString().isNotEmpty == true) 
-            ? cashierData['merchantId'] 
+        final merchantId =
+            (cashierData['merchantId']?.toString().isNotEmpty == true)
+            ? cashierData['merchantId']
             : parentMerchantId;
 
         return MerchantUser(
@@ -218,5 +222,46 @@ class AuthService {
   // Logout
   Future<void> logout() async {
     await _auth.signOut();
+  }
+
+  Future<UserCredential> registerMerchant({
+    required Map<String, dynamic> merchantData,
+    required String crNumberWithBranch,
+    required String contactName,
+  }) async {
+    final email = '${crNumberWithBranch}@dualverse.app';
+    final tempPassword = '${crNumberWithBranch}-temp-password-!@#\$';
+
+    final userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: tempPassword,
+    );
+
+    final user = userCredential.user!;
+    final firestore = FirebaseFirestore.instance;
+    final batch = firestore.batch();
+
+    merchantData['id'] = user.uid;
+
+    batch.set(firestore.collection('merchants').doc(user.uid), merchantData);
+
+    batch.set(firestore.collection('roles_merchants').doc(user.uid), {
+      'merchantId': user.uid,
+      'role': 'merchant',
+      'crNumber': crNumberWithBranch,
+    });
+
+    batch.set(firestore.collection('roles_merchant_admin').doc(user.uid), {
+      'merchantId': user.uid,
+      'role': 'merchant_super_admin',
+      'name': contactName,
+      'email': email,
+      'crNumber': crNumberWithBranch,
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+
+    await batch.commit();
+
+    return userCredential;
   }
 }

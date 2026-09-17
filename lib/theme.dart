@@ -13,7 +13,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme.light(
         primary: primary,
         background: background,
         surface: card,
@@ -24,7 +24,7 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: background,
       fontFamily: 'Inter', // Assuming we will add Inter font later
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: card,
         foregroundColor: foreground,
         elevation: 0,

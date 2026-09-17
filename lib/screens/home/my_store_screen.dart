@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class MyStoreScreen extends StatefulWidget {
-  const MyStoreScreen({super.key});
+  MyStoreScreen({super.key});
 
   @override
   State<MyStoreScreen> createState() => _MyStoreScreenState();
@@ -17,13 +19,13 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Merchant Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Merchant Profile'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -32,15 +34,15 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
         stream: _firestore.collection('merchants').doc(user.uid).snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading store data'));
+            return Center(child: Text('Error loading store data'.tr(context)));
           }
 
           if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text('Store not found'));
+            return Center(child: Text('Store not found'.tr(context)));
           }
 
           final merchant = snapshot.data!.data() as Map<String, dynamic>;
@@ -66,7 +68,7 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
           final country = address?['country'] ?? 'Bahrain';
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Column(
               children: [
                 // Header Profile
@@ -87,19 +89,19 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
                               ? Image.network(
                                   imageUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (c, e, s) => const Icon(Icons.store, size: 48, color: Colors.grey),
+                                  errorBuilder: (c, e, s) => Icon(Icons.store, size: 48, color: Colors.grey),
                                 )
-                              : const Icon(Icons.store, size: 48, color: Colors.grey),
+                              : Icon(Icons.store, size: 48, color: Colors.grey),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(businessName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 12),
+                      Text(businessName, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 4),
                       Text(contactEmail, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
 
                 // Primary Info
                 _buildInfoCard(
@@ -114,7 +116,7 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
                     _InfoItem(icon: Icons.calendar_today, label: 'Date Joined', value: dateJoined),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Business Details
                 _buildInfoCard(
@@ -126,7 +128,7 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
                     _InfoItem(icon: Icons.attach_money, label: 'Price Range', value: priceRange),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
 
                 // Address
                 _buildInfoCard(
@@ -140,7 +142,7 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
                     _InfoItem(icon: Icons.public, label: 'Country', value: country),
                   ],
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
               ],
             ),
           );
@@ -154,26 +156,26 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            const SizedBox(height: 16),
+            Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            SizedBox(height: 16),
             ...items.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
+                  padding: EdgeInsets.only(bottom: 12.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(item.icon, size: 20, color: Colors.grey[500]),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(item.label, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                            const SizedBox(height: 2),
-                            Text(item.value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                            SizedBox(height: 2),
+                            Text(item.value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                           ],
                         ),
                       ),

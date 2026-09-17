@@ -4,12 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as Math;
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class TransactionsScreen extends StatefulWidget {
   final bool isCashier;
   final String? merchantId;
 
-  const TransactionsScreen({
+  TransactionsScreen({
     super.key,
     this.isCashier = false,
     this.merchantId,
@@ -71,7 +73,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -81,7 +83,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           ),
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(20.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,25 +93,25 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.receipt_long, color: Colors.green, size: 20),
-                          const SizedBox(width: 8),
-                          const Text('Transaction Details', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          Icon(Icons.receipt_long, color: Colors.green, size: 20),
+                          SizedBox(width: 8),
+                          Text('Transaction Details'.tr(context), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       InkWell(
                         onTap: () => Navigator.pop(context),
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.green, width: 1.5),
                           ),
-                          child: const Icon(Icons.close, size: 16, color: Colors.green),
+                          child: Icon(Icons.close, size: 16, color: Colors.green),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
                   
                   // Customer Info Row
                   Row(
@@ -122,29 +124,28 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           children: [
                             Text(
                               userProfile['name']?.toString() ?? 'Unknown',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Text(
                               DateFormat('MMM dd, yyyy hh:mm a').format(date),
-                              style: const TextStyle(color: Colors.grey, fontSize: 12),
+                              style: TextStyle(color: Colors.grey, fontSize: 12),
                             ),
-                            const SizedBox(height: 2),
+                            SizedBox(height: 2),
                             Row(
                               children: [
-                                Text(
-                                  'ID: ${id.substring(0, Math.min(20, id.length))}...',
-                                  style: const TextStyle(color: Colors.grey, fontSize: 10),
+                                Text('ID: ${id.substring(0, Math.min(20, id.length))}...',
+                                  style: TextStyle(color: Colors.grey, fontSize: 10),
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: 4),
                                 InkWell(
                                   onTap: () {
                                     Clipboard.setData(ClipboardData(text: id));
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('ID Copied'), duration: Duration(seconds: 1)),
+                                      SnackBar(content: Text('ID Copied'.tr(context)), duration: Duration(seconds: 1)),
                                     );
                                   },
-                                  child: const Icon(Icons.copy, size: 12, color: Colors.grey),
+                                  child: Icon(Icons.copy, size: 12, color: Colors.grey),
                                 )
                               ],
                             )
@@ -168,16 +169,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
                   
                   if (items.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    const Text('ITEMS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 24),
+                    Text('ITEMS'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
+                    SizedBox(height: 8),
                     ...items.map((item) {
                       final name = item['name']?.toString() ?? 'Item';
                       final qty = item['quantity'] ?? 1;
                       final price = (item['price'] ?? 0.0).toDouble();
-                      final img = item['imageUrl']?.toString() ?? '';
+                      final rawImg = item['imageUrl']?.toString() ?? '';
+                      final img = rawImg.replaceAll('studio-3536520071-24fe5', 'atta-studio-develop');
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
+                        padding: EdgeInsets.only(bottom: 12.0),
                         child: Row(
                           children: [
                             Container(
@@ -189,54 +191,54 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: img.isNotEmpty 
-                                ? Image.network(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.fastfood, size: 16, color: Colors.grey))
-                                : const Icon(Icons.fastfood, size: 16, color: Colors.grey),
+                                ? Image.network(img, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.fastfood, size: 16, color: Colors.grey))
+                                : Icon(Icons.fastfood, size: 16, color: Colors.grey),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                                  Text(name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                                   Text('${qty}x @ BHD ${price.toStringAsFixed(3)}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                                 ],
                               ),
                             ),
-                            Text('BHD ${(price * qty).toStringAsFixed(3)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('BHD ${(price * qty).toStringAsFixed(3)}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           ],
                         ),
                       );
                     }).toList(),
                   ],
                   
-                  const Divider(height: 32),
+                  Divider(height: 32),
                   
                   _buildSummaryRow('Subtotal', 'BHD ${subtotal.toStringAsFixed(3)}'),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   if (taxAmount > 0)
                     _buildSummaryRow('VAT (${taxRate.toStringAsFixed(0)}%)', 'BHD ${taxAmount.toStringAsFixed(3)}'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   _buildSummaryRow('Total Amount', 'BHD ${amount.toStringAsFixed(3)}', isBold: true),
                   
-                  const Divider(height: 32),
+                  Divider(height: 32),
                   
-                  const Text('PAYMENT METHOD', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
-                  const SizedBox(height: 8),
+                  Text('PAYMENT METHOD'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
+                  SizedBox(height: 8),
                   _buildSummaryRow(paymentMethod, 'BHD ${amount.toStringAsFixed(3)}'),
                   
                   if (cashback > 0 || loyaltyPoints > 0) ...[
-                    const Divider(height: 32),
-                    const Text('REWARDS GRANTED', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
-                    const SizedBox(height: 8),
+                    Divider(height: 32),
+                    Text('REWARDS GRANTED'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
+                    SizedBox(height: 8),
                     if (cashback > 0)
                       _buildSummaryRow('Cashback', 'BHD ${cashback.toStringAsFixed(3)}', color: Colors.blue),
                     if (loyaltyPoints > 0)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: EdgeInsets.only(top: 8.0),
                         child: _buildSummaryRow('Loyalty Points', '${loyaltyPoints.toStringAsFixed(0)} Pts', color: Colors.green),
                       ),
                   ],
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                 ],
               ),
             ),
@@ -274,7 +276,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     final targetMerchantId = widget.isCashier ? (widget.merchantId ?? user.uid) : user.uid;
@@ -289,7 +291,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Transactions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Transactions'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -298,7 +300,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         stream: streamQuery.snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -321,19 +323,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.receipt_long, size: 64, color: Colors.grey[400]),
-                  const SizedBox(height: 16),
-                  const Text('No Transactions Yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text('Your payment history will appear here.', style: TextStyle(color: Colors.grey[600])),
+                  SizedBox(height: 16),
+                  Text('No Transactions Yet'.tr(context), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text('Your payment history will appear here.'.tr(context), style: TextStyle(color: Colors.grey[600])),
                 ],
               ),
             );
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             itemCount: transactions.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            separatorBuilder: (_, __) => SizedBox(height: 12),
             itemBuilder: (context, index) {
               final doc = transactions[index];
               final data = doc.data() as Map<String, dynamic>;
@@ -389,7 +391,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 onTap: () => _showTransactionDetails(data, doc.id, userProfile),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -398,7 +400,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       BoxShadow(
                         color: Colors.black.withOpacity(0.02),
                         blurRadius: 4,
-                        offset: const Offset(0, 2),
+                        offset: Offset(0, 2),
                       )
                     ]
                   ),
@@ -419,50 +421,47 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       else
                         const _AvatarPlaceholder(),
                         
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               userProfile['name']?.toString() ?? 'Unknown',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                             ),
-                            const SizedBox(height: 2),
+                            SizedBox(height: 2),
                             Row(
                               children: [
-                                const Text('+ ', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14)),
-                                Text('${amount.toStringAsFixed(3)} ', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14)),
-                                const Text('BHD', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
+                                Text('+ '.tr(context), style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14)),
+                                Text('${amount.toStringAsFixed(3)} ', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14)),
+                                Text('BHD', style: TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold)),
                               ],
                             ),
                             if (taxAmount > 0) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                'Includes VAT (${taxRate.toStringAsFixed(0)}%): BHD ${taxAmount.toStringAsFixed(3)}',
-                                style: const TextStyle(color: Colors.grey, fontSize: 10),
+                              SizedBox(height: 4),
+                              Text('Includes VAT (${taxRate.toStringAsFixed(0)}%): BHD ${taxAmount.toStringAsFixed(3)}',
+                                style: TextStyle(color: Colors.grey, fontSize: 10),
                               ),
                             ],
                             if (cashback > 0) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                'Cashback: ${cashback.toStringAsFixed(3)} BHD',
-                                style: const TextStyle(color: Color(0xFF1EBB5E), fontSize: 10, fontWeight: FontWeight.w600),
+                              SizedBox(height: 4),
+                              Text('Cashback: ${cashback.toStringAsFixed(3)} BHD',
+                                style: TextStyle(color: Color(0xFF1EBB5E), fontSize: 10, fontWeight: FontWeight.w600),
                               ),
                             ],
-                            const SizedBox(height: 6),
+                            SizedBox(height: 6),
                             Text(
                               DateFormat('MMM dd, yyyy, hh:mm a').format(date),
                               style: TextStyle(color: Colors.grey[500], fontSize: 10),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4),
                             Row(
                               children: [
-                                Text(
-                                  'ID: ${doc.id.substring(0, 16)}...',
+                                Text('ID: ${doc.id.substring(0, 16)}...',
                                   style: TextStyle(color: Colors.grey[400], fontSize: 9),
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: 4),
                                 Icon(Icons.copy, size: 10, color: Colors.grey[400])
                               ],
                             )
@@ -492,7 +491,7 @@ class _AvatarPlaceholder extends StatelessWidget {
         color: Colors.grey[200],
         shape: BoxShape.circle,
       ),
-      child: const Icon(Icons.person, color: Colors.grey, size: 24),
+      child: Icon(Icons.person, color: Colors.grey, size: 24),
     );
   }
 }

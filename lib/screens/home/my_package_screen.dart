@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'merchant_checkout_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class MyPackageScreen extends StatefulWidget {
-  const MyPackageScreen({super.key});
+  MyPackageScreen({super.key});
 
   @override
   State<MyPackageScreen> createState() => _MyPackageScreenState();
@@ -70,22 +72,22 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('My Package', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('My Package'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: _isLoadingMerchant
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('paymentTiers').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
 
                 if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading packages'));
+                  return Center(child: Text('Error loading packages'.tr(context)));
                 }
 
                 var tiers = snapshot.data?.docs.map((d) {
@@ -111,7 +113,7 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
                 final activeSub = _merchantData?['activeSubscription'] as Map<String, dynamic>?;
 
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -119,12 +121,12 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
                         _buildActiveSubscriptionCard(activeSub),
                       
                       if (activeSub != null && activeSub['status'] == 'active')
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         
-                      const Text('Available Plans', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Text('Choose a plan to upgrade or renew', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                      const SizedBox(height: 16),
+                      Text('Available Plans'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 4),
+                      Text('Choose a plan to upgrade or renew'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      SizedBox(height: 16),
                       
                       ...tiers.map((tier) => _buildTierCard(tier, activeSub)),
                     ],
@@ -162,43 +164,43 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
             top: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: const BoxDecoration(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
                 color: Colors.green,
                 borderRadius: BorderRadius.only(topRight: Radius.circular(12), bottomLeft: Radius.circular(12)),
               ),
-              child: const Text('ACTIVE', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              child: Text('ACTIVE'.tr(context), style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
                       child: Icon(Icons.verified_user, color: Theme.of(context).primaryColor),
                     ),
-                    const SizedBox(width: 12),
-                    const Column(
+                    SizedBox(width: 12),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Already Subscribed', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text('Your current business plan', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Text('Already Subscribed'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text('Your current business plan'.tr(context), style: TextStyle(fontSize: 12, color: Colors.grey)),
                       ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 8),
+                SizedBox(height: 16),
+                Divider(),
+                SizedBox(height: 8),
                 _buildSubDetailRow(Icons.stars, 'Plan Name', tierName),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _buildSubDetailRow(Icons.event, 'Expiry Date', isLifetime ? 'Lifetime' : formattedExpiry),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 _buildSubDetailRow(Icons.access_time, 'Period', isLifetime ? 'Unlimited' : '$durationMonths Months'),
               ],
             ),
@@ -215,11 +217,11 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
         Row(
           children: [
             Icon(icon, size: 16, color: Colors.grey[600]),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[700], fontWeight: FontWeight.bold)),
           ],
         ),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
       ],
     );
   }
@@ -242,7 +244,7 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
     final servicesList = tier['services'] as List<dynamic>?;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: EdgeInsets.only(bottom: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: isRecommended ? Theme.of(context).primaryColor : Colors.transparent, width: 2),
@@ -251,11 +253,11 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0),
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.1), shape: BoxShape.circle),
                   child: Icon(
                     name.toLowerCase().contains('gold') ? Icons.workspace_premium : Icons.stars, 
@@ -263,51 +265,51 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
                     color: name.toLowerCase().contains('gold') ? Colors.yellow[700] : Colors.grey[500],
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                const SizedBox(height: 8),
+                SizedBox(height: 12),
+                Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(price.toStringAsFixed(3), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
-                    const SizedBox(width: 4),
+                    Text(price.toStringAsFixed(3), style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900)),
+                    SizedBox(width: 4),
                     Text('BHD / $duration mo', style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0),
             child: Column(
               children: [
                 if (featuresList != null)
                   ...featuresList.where((f) => f['isAvailable'] == true).map((f) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
+                    padding: EdgeInsets.only(bottom: 12.0),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green, size: 18),
-                        const SizedBox(width: 12),
+                        Icon(Icons.check_circle, color: Colors.green, size: 18),
+                        SizedBox(width: 12),
                         Expanded(child: Text('${f['name']}${f['value'] != '✓' ? ' (${f['value']})' : ''}', style: TextStyle(color: Colors.grey[700]))),
                       ],
                     ),
                   )).toList()
                 else if (servicesList != null)
                   ...servicesList.map((s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
+                    padding: EdgeInsets.only(bottom: 12.0),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green, size: 18),
-                        const SizedBox(width: 12),
+                        Icon(Icons.check_circle, color: Colors.green, size: 18),
+                        SizedBox(width: 12),
                         Expanded(child: Text(s.toString(), style: TextStyle(color: Colors.grey[700]))),
                       ],
                     ),
                   )).toList(),
                   
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
@@ -323,7 +325,7 @@ class _MyPackageScreenState extends State<MyPackageScreen> {
                     ),
                     child: Text(
                       isCurrent ? 'Current Plan' : (activeSub?['isLifetime'] == true ? 'Managed by Admin' : 'Choose Plan'), 
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),

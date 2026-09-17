@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/orders/manage_order_card.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ManageOrdersScreen extends StatefulWidget {
-  const ManageOrdersScreen({super.key});
+  ManageOrdersScreen({super.key});
 
   @override
   State<ManageOrdersScreen> createState() => _ManageOrdersScreenState();
@@ -15,14 +17,14 @@ class _ManageOrdersScreenState extends State<ManageOrdersScreen> {
   
   @override
   Widget build(BuildContext context) {
-    if (user == null) return const Scaffold(body: Center(child: Text('Not logged in')));
+    if (user == null) return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Manage Orders', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text('Manage Orders'.tr(context), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
         elevation: 1,
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -43,7 +45,7 @@ class _ManageOrdersScreenState extends State<ManageOrdersScreen> {
                 .snapshots(),
             builder: (context, ordersSnapshot) {
               if (ordersSnapshot.connectionState == ConnectionState.waiting && !ordersSnapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child: CircularProgressIndicator());
               }
 
               if (ordersSnapshot.hasError) {
@@ -53,22 +55,22 @@ class _ManageOrdersScreenState extends State<ManageOrdersScreen> {
               final orders = ordersSnapshot.data?.docs ?? [];
 
               if (orders.isEmpty) {
-                return const Center(
+                return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.search_off, size: 64, color: Colors.black26),
                       SizedBox(height: 16),
-                      Text('No orders found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('No orders found'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       SizedBox(height: 8),
-                      Text('Incoming orders will appear here.', style: TextStyle(color: Colors.grey)),
+                      Text('Incoming orders will appear here.'.tr(context), style: TextStyle(color: Colors.grey)),
                     ],
                   ),
                 );
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 itemCount: orders.length,
                 itemBuilder: (context, index) {
                   final orderDoc = orders[index];

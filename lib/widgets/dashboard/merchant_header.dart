@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../screens/home/my_qr_screen.dart';
 import '../../screens/home/payments_screen.dart';
 import '../../screens/home/payment_request_screen.dart';
 import '../../services/merchant_service.dart';
 import '../../screens/home/settings_screen.dart';
+import '../../screens/home/notifications_screen.dart';
+import 'package:provider/provider.dart';
+import '../../models/merchant_user.dart';
+import '../../providers/translation_extension.dart';
 
 class MerchantHeader extends StatefulWidget {
   final String merchantName;
@@ -17,8 +22,9 @@ class MerchantHeader extends StatefulWidget {
   final String? cashierName;
   final String? counterNumber;
   final bool isShiftClosed;
+  final String merchantId;
 
-  const MerchantHeader({
+  MerchantHeader({
     super.key,
     required this.merchantName,
     required this.tier,
@@ -31,6 +37,7 @@ class MerchantHeader extends StatefulWidget {
     this.cashierName,
     this.counterNumber,
     this.isShiftClosed = false,
+    required this.merchantId,
   });
 
   @override
@@ -38,6 +45,7 @@ class MerchantHeader extends StatefulWidget {
 }
 
 class _MerchantHeaderState extends State<MerchantHeader> {
+  final GlobalKey _avatarKey = GlobalKey();
   bool _showBD = false;
   double _bhdValuePerPoint = 0.01;
 
@@ -60,110 +68,194 @@ class _MerchantHeaderState extends State<MerchantHeader> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1EBB5E), // The specific green color from the screenshot
-        borderRadius: const BorderRadius.only(
+        color: Color(
+          0xFF1EBB5E,
+        ), // The specific green color from the screenshot
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
+      padding: EdgeInsets.fromLTRB(16, 48, 16, 24),
       child: Column(
         children: [
           // Top Row: Logo & Icons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Placeholder for the "M" logo
-              const Icon(Icons.maps_home_work, color: Colors.white, size: 36),
+              Image.asset(
+                'assets/images/logo.png',
+                height: 40,
+                fit: BoxFit.contain,
+                color: Colors.white,
+              ),
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                    icon: Icon(
+                      Icons.shopping_cart_outlined,
+                      color: Colors.white,
+                    ),
                     onPressed: () {},
                   ),
                   Stack(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.notifications_none, color: Colors.white),
-                        onPressed: () {},
+                        icon: Icon(
+                          Icons.notifications_none,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (widget.merchantId.isNotEmpty) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => NotificationsScreen(
+                                  merchantId: widget.merchantId,
+                                ),
+                              ),
+                            );
+                          }
+                        },
                       ),
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                            minHeight: 16,
-                          ),
-                          child: const Text(
-                            '1',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
+                      if (widget.merchantId.isNotEmpty)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('merchants')
+                                .doc(widget.merchantId)
+                                .collection('notifications')
+                                .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData ||
+                                      snapshot.data!.docs.isEmpty)
+                                    return SizedBox.shrink();
+
+                                  int unreadCount = snapshot.data!.docs.where((
+                                    doc,
+                                  ) {
+                                    final data =
+                                        doc.data() as Map<String, dynamic>;
+                                    return data['read'] != true &&
+                                        data['isRead'] != true;
+                                  }).length;
+
+                                  if (unreadCount == 0)
+                                    return SizedBox.shrink();
+
+                                  return Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 16,
+                                      minHeight: 16,
+                                    ),
+                                    child: Text(
+                                      unreadCount > 99
+                                          ? '99+'
+                                          : unreadCount.toString(),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                            textAlign: TextAlign.center,
+                        ],
+                  ),
+                  SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      showGeneralDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        barrierLabel: 'Dismiss',
+                        barrierColor: Colors.black12,
+                        pageBuilder: (context, anim1, anim2) => SafeArea(
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                top: 60,
+                                right: 16,
+                                child: Material(
+                                  elevation: 8,
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
+                                  child: Container(
+                                    width: 220,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Text(
+                                            'My Account'.tr(context),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        ListTile(
+                                          leading: Icon(Icons.settings),
+                                          title: Text('Settings'.tr(context)),
+                                          visualDensity: VisualDensity.compact,
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    SettingsScreen(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        ListTile(
+                                          leading: Icon(Icons.logout),
+                                          title: Text('Logout'.tr(context)),
+                                          visualDensity: VisualDensity.compact,
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            widget.onLogout();
+                                          },
+                                        ),
+                                        SizedBox(height: 8),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 8),
-                  PopupMenuButton<String>(
-                    offset: const Offset(0, 48),
-                    onSelected: (value) {
-                      if (value == 'settings') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SettingsScreen()),
-                        );
-                      } else if (value == 'logout') {
-                        widget.onLogout();
-                      }
+                      );
                     },
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        enabled: false,
-                        child: Text(
-                          'My Account',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-                        ),
-                      ),
-                      const PopupMenuDivider(),
-                      const PopupMenuItem<String>(
-                        value: 'settings',
-                        child: Row(
-                          children: [
-                            Icon(Icons.settings, size: 20, color: Colors.black54),
-                            SizedBox(width: 12),
-                            Text('Settings'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuDivider(),
-                      const PopupMenuItem<String>(
-                        value: 'logout',
-                        child: Row(
-                          children: [
-                            Icon(Icons.logout, size: 20, color: Colors.black54),
-                            SizedBox(width: 12),
-                            Text('Logout'),
-                          ],
-                        ),
-                      ),
-                    ],
                     child: CircleAvatar(
                       backgroundColor: Colors.white,
                       radius: 18,
-                      backgroundImage: widget.imageUrl != null ? NetworkImage(widget.imageUrl!) : null,
+                      backgroundImage: widget.imageUrl != null
+                          ? NetworkImage(widget.imageUrl!)
+                          : null,
                       child: widget.imageUrl == null
                           ? Text(
-                              widget.merchantName.isNotEmpty ? widget.merchantName[0].toUpperCase() : 'M',
-                              style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                              widget.merchantName.isNotEmpty
+                                  ? widget.merchantName[0].toUpperCase()
+                                  : 'M',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                              ),
                             )
                           : null,
                     ),
@@ -172,7 +264,7 @@ class _MerchantHeaderState extends State<MerchantHeader> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           // Middle Row: Greeting & Stats
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,8 +279,8 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                       children: [
                         Flexible(
                           child: Text(
-                            'Hi ${widget.merchantName}!',
-                            style: const TextStyle(
+                            '${'Hi'.tr(context)} ${widget.merchantName}!',
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -196,29 +288,32 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          widget.tier,
-                          style: const TextStyle(
-                            color: Color(0xFF1EBB5E),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                        SizedBox(width: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            widget.tier,
+                            style: TextStyle(
+                              color: Color(0xFF1EBB5E),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
                       ],
                     ),
                     if (widget.isCashier && widget.cashierName != null) ...[
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Text(
-                        'Cashier: ${widget.cashierName} ${widget.counterNumber != null ? '| Counter: ${widget.counterNumber}' : ''}',
-                        style: const TextStyle(
+                        '${'Cashier'.tr(context)}: ${widget.cashierName} ${widget.counterNumber != null ? '| ${'Counter'.tr(context)}: ${widget.counterNumber}' : ''}',
+                        style: TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
@@ -233,16 +328,16 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    _showBD 
-                      ? '${(widget.loyaltyPoints * _bhdValuePerPoint).toStringAsFixed(3)} BD' 
-                      : '${widget.loyaltyPoints.toStringAsFixed(2)} LP',
-                    style: const TextStyle(
+                    _showBD
+                        ? '${(widget.loyaltyPoints * _bhdValuePerPoint).toStringAsFixed(3)} ${'BD'.tr(context)}'
+                        : '${widget.loyaltyPoints.toStringAsFixed(2)} ${'LP'.tr(context)}',
+                    style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   GestureDetector(
                     onTap: () {
                       setState(() {
@@ -250,8 +345,8 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                       });
                     },
                     child: Text(
-                      _showBD ? 'Click to check LP' : 'Click to check BD',
-                      style: const TextStyle(
+                      _showBD ? 'Click to check LP'.tr(context) : 'Click to check BD'.tr(context),
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,
                         decoration: TextDecoration.underline,
@@ -259,26 +354,20 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
-                    'Issued Loyalty: ${widget.issuedLoyalty.toStringAsFixed(0)} LP',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 10,
-                    ),
+                    '${'Issued Loyalty'.tr(context)}: ${widget.issuedLoyalty.toStringAsFixed(0)} ${'LP'.tr(context)}',
+                    style: TextStyle(color: Colors.white70, fontSize: 10),
                   ),
                   Text(
-                    'Issued Cashback: ${widget.issuedCashback.toStringAsFixed(2)} LP',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 10,
-                    ),
+                    '${'Issued Cashback'.tr(context)}: ${widget.issuedCashback.toStringAsFixed(2)} ${'LP'.tr(context)}',
+                    style: TextStyle(color: Colors.white70, fontSize: 10),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
           // Bottom Row: Main Actions
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,13 +375,13 @@ class _MerchantHeaderState extends State<MerchantHeader> {
               Expanded(
                 child: _buildActionItem(
                   context,
-                  Icons.qr_code, 
+                  Icons.qr_code,
                   'My QR',
                   disabled: widget.isCashier && widget.isShiftClosed,
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MyQrScreen()),
+                      MaterialPageRoute(builder: (context) => MyQrScreen()),
                     );
                   },
                 ),
@@ -301,39 +390,43 @@ class _MerchantHeaderState extends State<MerchantHeader> {
                 Expanded(
                   child: _buildActionItem(
                     context,
-                    Icons.verified_user_outlined, 
+                    Icons.verified_user_outlined,
                     'KYC Update',
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('KYC Update coming soon')),
+                        SnackBar(
+                          content: Text('KYC Update coming soon'.tr(context)),
+                        ),
                       );
                     },
                   ),
                 ),
               Expanded(
                 child: _buildActionItem(
-                  context, 
-                  Icons.credit_card, 
+                  context,
+                  Icons.credit_card,
                   'Payments',
                   disabled: widget.isCashier && widget.isShiftClosed,
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const PaymentsScreen()),
+                      MaterialPageRoute(builder: (context) => PaymentsScreen()),
                     );
                   },
                 ),
               ),
               Expanded(
                 child: _buildActionItem(
-                  context, 
-                  Icons.send, 
+                  context,
+                  Icons.send,
                   'Payment\nRequest',
                   disabled: widget.isCashier && widget.isShiftClosed,
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const PaymentRequestScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => PaymentRequestScreen(),
+                      ),
                     );
                   },
                 ),
@@ -345,31 +438,43 @@ class _MerchantHeaderState extends State<MerchantHeader> {
     );
   }
 
-  Widget _buildActionItem(BuildContext context, IconData icon, String label, {VoidCallback? onTap, bool disabled = false}) {
+  Widget _buildActionItem(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    VoidCallback? onTap,
+    bool disabled = false,
+  }) {
     return GestureDetector(
-      onTap: disabled ? () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Open counter to access this feature')),
-        );
-      } : onTap,
+      onTap: disabled
+          ? () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Open counter to access this feature'.tr(context),
+                  ),
+                ),
+              );
+            }
+          : onTap,
       child: Opacity(
         opacity: disabled ? 0.5 : 1.0,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: Colors.white, size: 28),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
-              label,
+              label.tr(context),
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 11, // Slightly smaller font to fit 4 items better
                 fontWeight: FontWeight.w500,

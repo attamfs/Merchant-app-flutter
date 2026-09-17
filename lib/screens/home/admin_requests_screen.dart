@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'merchant_checkout_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class AdminRequestsScreen extends StatefulWidget {
-  const AdminRequestsScreen({super.key});
+  AdminRequestsScreen({super.key});
 
   @override
   State<AdminRequestsScreen> createState() => _AdminRequestsScreenState();
@@ -19,13 +21,13 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Admin Requests', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Admin Requests'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -37,11 +39,11 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading requests'));
+            return Center(child: Text('Error loading requests'.tr(context)));
           }
 
           final allRequests = snapshot.data?.docs.map((d) {
@@ -70,20 +72,19 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.blue.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.security, size: 48, color: Theme.of(context).primaryColor),
                   ),
-                  const SizedBox(height: 16),
-                  const Text('No Admin Requests', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 16),
+                  Text('No Admin Requests'.tr(context), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Text(
-                      'You don\'t have any subscription or administrative payment requests at this time.',
+                    padding: EdgeInsets.symmetric(horizontal: 32),
+                    child: Text('You don\'.tr(context)t have any subscription or administrative payment requests at this time.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey[600]),
                     ),
@@ -94,7 +95,7 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             itemCount: adminRequests.length,
             itemBuilder: (context, index) {
               final req = adminRequests[index];
@@ -146,7 +147,7 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Theme.of(context).primaryColor, width: 2),
@@ -155,7 +156,7 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,14 +165,14 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Plan: $tierName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      const SizedBox(height: 4),
-                      Text('Received: ${DateFormat('MMM d, yyyy • h:mm a').format(createdAt)}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Plan: $tierName'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      SizedBox(height: 4),
+                      Text('Received: ${DateFormat('MMM d, yyyy • h:mm a').format(createdAt)}', style: TextStyle(fontSize: 10, color: Colors.grey)),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusBgColor,
                     borderRadius: BorderRadius.circular(12),
@@ -181,7 +182,7 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(statusIcon, size: 12, color: statusColor),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text(statusLabel, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: statusColor)),
                     ],
                   ),
@@ -189,9 +190,9 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -199,15 +200,15 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('TOTAL AMOUNT', style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                    const SizedBox(height: 2),
+                    Text('TOTAL AMOUNT'.tr(context), style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                    SizedBox(height: 2),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(amount.toStringAsFixed(3), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Theme.of(context).primaryColor)),
-                        const SizedBox(width: 4),
-                        const Text('BHD', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 4),
+                        Text('BHD', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ],
@@ -228,9 +229,9 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
                     },
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                     ),
-                    child: const Text('Pay Now', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text('Pay Now'.tr(context), style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
               ],
             ),

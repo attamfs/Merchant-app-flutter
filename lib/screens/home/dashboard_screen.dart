@@ -16,10 +16,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'end_of_day_screen.dart';
 import 'my_qr_screen.dart';
 import 'merchant_payment_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_provider.dart';
 import 'create_payment_request_screen.dart';
+import '../../providers/translation_extension.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -54,19 +57,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Counter Opened: You can now accept payments and process transactions.')),
+        SnackBar(content: Text('Counter Opened: You can now accept payments and process transactions.'.tr(context))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = context.watch<TranslationProvider>().t;
     final theme = Theme.of(context);
     final authService = AuthService();
     final user = authService.currentUser;
 
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
     
     return Scaffold(
@@ -74,13 +78,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: _buildBody(authService, user),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
-        backgroundColor: const Color(0xFF1E293B), // Dark slate color
-        shape: const CircleBorder(),
-        child: const Icon(Icons.qr_code_scanner, color: Colors.white),
+        backgroundColor: Color(0xFF1E293B), // Dark slate color
+        shape: CircleBorder(),
+        child: Icon(Icons.qr_code_scanner, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
+        shape: CircularNotchedRectangle(),
         notchMargin: 8.0,
         color: Colors.white,
         child: SizedBox(
@@ -88,11 +92,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(icon: Icons.home, label: 'Home', index: 0, isActive: _currentIndex == 0),
-              _buildNavItem(icon: Icons.list_alt, label: 'Transactions', index: 1, isActive: _currentIndex == 1),
-              const SizedBox(width: 48), // Empty space for the FAB
-              _buildNavItem(icon: Icons.settings, label: 'Settings', index: 2, isActive: _currentIndex == 2),
-              _buildNavItem(icon: Icons.person_outline, label: 'Profile', index: 3, isActive: _currentIndex == 3),
+              _buildNavItem(icon: Icons.home, label: 'Home'.tr(context), index: 0, isActive: _currentIndex == 0),
+              _buildNavItem(icon: Icons.list_alt, label: 'Transactions'.tr(context), index: 1, isActive: _currentIndex == 1),
+              SizedBox(width: 48), // Empty space for the FAB
+              _buildNavItem(icon: Icons.settings, label: 'Settings'.tr(context), index: 2, isActive: _currentIndex == 2),
+              _buildNavItem(icon: Icons.person_outline, label: 'Profile'.tr(context), index: 3, isActive: _currentIndex == 3),
             ],
           ),
         ),
@@ -102,7 +106,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _showCounterClosedToast() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please open your counter to accept payments.')),
+      SnackBar(content: Text('Please open your counter to accept payments.'.tr(context))),
     );
   }
 
@@ -113,25 +117,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 4)),
               ],
             ),
             child: Icon(icon, color: Colors.black87, size: 28),
           ),
-          const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+          SizedBox(height: 8),
+          Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 
   Widget _buildNavItem({required IconData icon, required String label, required int index, required bool isActive}) {
-    final activeColor = const Color(0xFF1EBB5E);
+    final activeColor = Color(0xFF1EBB5E);
     final inactiveColor = Colors.grey;
     return Expanded(
       child: GestureDetector(
@@ -159,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 color: isActive ? activeColor : inactiveColor,
                 size: 24,
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2),
               Text(
                 label,
                 style: TextStyle(
@@ -177,11 +181,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildBody(AuthService authService, User user) {
     switch (_currentIndex) {
       case 1:
-        return const TransactionsScreen();
+        return TransactionsScreen();
       case 2:
-        return const SettingsScreen();
+        return SettingsScreen();
       case 3:
-        return const ProfileScreen();
+        return ProfileScreen();
       case 0:
       default:
         return _buildHomeDashboard(authService, user);
@@ -193,11 +197,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       future: authService.getMerchantUser(user),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting || !_prefsLoaded) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-          return const Center(child: Text('Failed to load merchant data'));
+          return Center(child: Text('Failed to load merchant data'.tr(context)));
         }
 
         final merchantUser = snapshot.data!;
@@ -207,15 +211,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, color: Colors.red, size: 64),
-                const SizedBox(height: 16),
-                const Text(
-                  'Access Denied or Missing Data',
+                Icon(Icons.error_outline, color: Colors.red, size: 64),
+                SizedBox(height: 16),
+                Text('Access Denied or Missing Data'.tr(context),
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
-                const Text('We could not find your merchant profile.'),
-                const SizedBox(height: 24),
+                SizedBox(height: 8),
+                Text('We could not find your merchant profile.'.tr(context)),
+                SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
                     await authService.logout();
@@ -223,7 +226,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Navigator.pushReplacementNamed(context, '/');
                     }
                   },
-                  child: const Text('Logout'),
+                  child: Text('Logout'.tr(context)),
                 ),
               ],
             ),
@@ -273,6 +276,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     cashierName: cashierName,
                     counterNumber: _counterNumber,
                     isShiftClosed: isShiftClosed,
+                    merchantId: merchantUser.merchantId,
                     onLogout: () async {
                       await authService.logout();
                       if (mounted) {
@@ -284,9 +288,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 if (isCashier && isShiftClosed)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                      padding: EdgeInsets.fromLTRB(16, 24, 16, 0),
                       child: Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.red.shade50,
                           border: Border.all(color: Colors.red.shade200),
@@ -295,7 +299,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             BoxShadow(
                               color: Colors.black.withOpacity(0.05),
                               blurRadius: 4,
-                              offset: const Offset(0, 2),
+                              offset: Offset(0, 2),
                             ),
                           ],
                         ),
@@ -306,17 +310,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Counter is Closed',
+                                  Text('Counter is Closed'.tr(context),
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.red,
                                       fontSize: 14,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Open counter to accept payments.',
+                                  SizedBox(height: 4),
+                                  Text('Open counter to accept payments.'.tr(context),
                                     style: TextStyle(
                                       color: Colors.grey.shade600,
                                       fontSize: 10,
@@ -334,20 +336,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              child: const Text('Open Counter'),
+                              child: Text('Open Counter'.tr(context)),
                             ),
                           ],
                         ),
                       ),
                     ),
                   ),
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: SizedBox(height: 24),
                 ),
                 SliverToBoxAdapter(
                   child: MerchantSummary(merchantUser: merchantUser),
                 ),
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: SizedBox(height: 24),
                 ),
                 SliverToBoxAdapter(
@@ -371,13 +373,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                   ),
                 ),
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: SizedBox(height: 24),
                 ),
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: MerchantCarousel(),
                 ),
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: SizedBox(height: 80), // Padding for the floating action button
                 ),
               ],

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ForgotPinScreen extends StatefulWidget {
-  const ForgotPinScreen({super.key});
+  ForgotPinScreen({super.key});
 
   @override
   State<ForgotPinScreen> createState() => _ForgotPinScreenState();
@@ -67,12 +69,12 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Not Registered'),
-            content: const Text('This mobile number is not registered in our system.'),
+            title: Text('Not Registered'.tr(context)),
+            content: Text('This mobile number is not registered in our system.'.tr(context)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
+                child: Text('Cancel'.tr(context)),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -83,7 +85,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Register'),
+                child: Text('Register'.tr(context)),
               ),
             ],
           ),
@@ -95,7 +97,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
     }
 
     // TODO: Implement actual OTP sending logic (e.g. Firebase or custom API)
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -105,7 +107,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
         });
         _startTimer();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Code sent to $_selectedCountryCode $phone')),
+          SnackBar(content: Text('Code sent to $_selectedCountryCode $phone'.trRead(context))),
         );
       }
     });
@@ -113,7 +115,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
 
   void _startTimer() {
     Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(Duration(seconds: 1));
       if (!mounted) return false;
       setState(() {
         if (_timeLeft > 0) {
@@ -130,7 +132,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
     final otp = _otpController.text.trim();
     if (otp.length != 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a 6-digit OTP')),
+        SnackBar(content: Text('Please enter a 6-digit OTP'.trRead(context))),
       );
       return;
     }
@@ -140,13 +142,13 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
     });
 
     // TODO: Implement actual OTP verification logic
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Identity verified. Please reset your PIN.')),
+          SnackBar(content: Text('Identity verified. Please reset your PIN.'.trRead(context))),
         );
         Navigator.pushReplacementNamed(context, '/forgot-pin/reset');
       }
@@ -166,7 +168,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             if (_otpSent) {
               setState(() {
@@ -185,7 +187,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -202,16 +204,16 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 
                 Text(
                   _otpSent ? 'Verify OTP' : 'Forgot PIN',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 
                 Text(
                   _otpSent 
@@ -223,19 +225,19 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
 
                 if (!_otpSent) ...[
                   Row(
                     children: [
                       Container(
-                        width: 100,
+                        width: 120,
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
                           border: Border.all(color: theme.colorScheme.onSurface.withOpacity(0.1)),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedCountryCode,
@@ -243,7 +245,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                             items: _countryCodes.map((code) {
                               return DropdownMenuItem(
                                 value: code,
-                                child: Text(code, style: const TextStyle(fontSize: 14)),
+                                child: Text('${{'+973':'🇧🇭','+966':'🇸🇦','+974':'🇶🇦','+965':'🇰🇼','+968':'🇴🇲','+971':'🇦🇪'}[code] ?? ""} \u200E$code', textDirection: TextDirection.ltr, style: TextStyle(fontSize: 14)),
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -254,7 +256,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Expanded(
                         child: CustomTextField(
                           controller: _phoneController,
@@ -283,7 +285,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   CustomButton(
                     text: 'Send OTP',
                     isLoading: _isLoading,
@@ -296,14 +298,14 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                     keyboardType: TextInputType.number,
                     maxLength: 6,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (_timeLeft > 0) ...[
-                        const Icon(Icons.timer, size: 16),
-                        const SizedBox(width: 4),
+                        Icon(Icons.timer, size: 16),
+                        SizedBox(width: 4),
                         Text(
                           _formatTime(_timeLeft),
                           style: TextStyle(
@@ -314,12 +316,12 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                       ] else ...[
                         TextButton(
                           onPressed: _isLoading ? null : _sendOtp,
-                          child: const Text('Resend OTP'),
+                          child: Text('Resend OTP'.tr(context)),
                         ),
                       ],
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   
                   CustomButton(
                     text: 'Verify',

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ForgotPinResetScreen extends StatefulWidget {
-  const ForgotPinResetScreen({super.key});
+  ForgotPinResetScreen({super.key});
 
   @override
   State<ForgotPinResetScreen> createState() => _ForgotPinResetScreenState();
@@ -23,14 +25,14 @@ class _ForgotPinResetScreenState extends State<ForgotPinResetScreen> {
 
     if (pin.length != 4 || confirmPin.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PIN must be 4 digits')),
+        SnackBar(content: Text('PIN must be 4 digits'.trRead(context))),
       );
       return;
     }
 
     if (pin != confirmPin) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PINs do not match')),
+        SnackBar(content: Text('PINs do not match'.trRead(context))),
       );
       return;
     }
@@ -40,13 +42,13 @@ class _ForgotPinResetScreenState extends State<ForgotPinResetScreen> {
     });
 
     // TODO: Connect to backend to reset PIN
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PIN Reset Successful! Please log in.')),
+          SnackBar(content: Text('PIN Reset Successful! Please log in.'.trRead(context))),
         );
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
@@ -59,33 +61,31 @@ class _ForgotPinResetScreenState extends State<ForgotPinResetScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reset PIN'),
+        title: Text('Reset PIN'.tr(context)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Create a new 4-digit PIN',
+              Text('Create a new 4-digit PIN'.tr(context),
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'This PIN will be used to log in to your account.',
+              SizedBox(height: 8),
+              Text('This PIN will be used to log in to your account.'.tr(context),
                 style: TextStyle(
                   fontSize: 14,
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
-              const Text('New PIN', style: TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
+              Text('New PIN'.tr(context), style: TextStyle(fontWeight: FontWeight.w500)),
+              SizedBox(height: 8),
               CustomTextField(
                 controller: _newPinController,
                 hintText: 'Enter 4-digit PIN',
@@ -104,10 +104,10 @@ class _ForgotPinResetScreenState extends State<ForgotPinResetScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
 
-              const Text('Confirm New PIN', style: TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
+              Text('Confirm New PIN'.tr(context), style: TextStyle(fontWeight: FontWeight.w500)),
+              SizedBox(height: 8),
               CustomTextField(
                 controller: _confirmPinController,
                 hintText: 'Re-enter 4-digit PIN',
@@ -126,7 +126,7 @@ class _ForgotPinResetScreenState extends State<ForgotPinResetScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               CustomButton(
                 text: 'Reset PIN',

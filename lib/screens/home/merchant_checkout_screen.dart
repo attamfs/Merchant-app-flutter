@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'payment_success_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class MerchantCheckoutScreen extends StatefulWidget {
   final String tierName;
   final double price;
   final int durationMonths;
 
-  const MerchantCheckoutScreen({
+  MerchantCheckoutScreen({
     super.key,
     required this.tierName,
     required this.price,
@@ -46,7 +48,7 @@ class _MerchantCheckoutScreenState extends State<MerchantCheckoutScreen> {
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Not logged in')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Not logged in'.tr(context))));
       return;
     }
 
@@ -102,7 +104,7 @@ class _MerchantCheckoutScreenState extends State<MerchantCheckoutScreen> {
     } catch (e) {
       setState(() => _isProcessing = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'.tr(context))));
       }
     }
   }
@@ -112,67 +114,66 @@ class _MerchantCheckoutScreenState extends State<MerchantCheckoutScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Checkout', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Checkout'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Order Summary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
+            Text('Order Summary'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.grey.shade200),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Plan', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-                      Text(widget.tierName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('Plan'.tr(context), style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                      Text(widget.tierName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ],
                   ),
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(vertical: 12.0),
                     child: Divider(height: 1),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Duration', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
-                      Text('${widget.durationMonths} Months', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Duration'.tr(context), style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                      Text('${widget.durationMonths} Months', style: TextStyle(fontWeight: FontWeight.bold)),
                     ],
                   ),
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(vertical: 12.0),
                     child: Divider(height: 1),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total to Pay', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text(
-                        'BHD ${widget.price.toStringAsFixed(3)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green),
+                      Text('Total to Pay'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('BHD ${widget.price.toStringAsFixed(3)}',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.green),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 32),
-            const Text('Payment Method', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
+            SizedBox(height: 32),
+            Text('Payment Method'.tr(context), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -181,17 +182,17 @@ class _MerchantCheckoutScreenState extends State<MerchantCheckoutScreen> {
               child: Row(
                 children: [
                   Icon(Icons.credit_card, color: Theme.of(context).primaryColor),
-                  const SizedBox(width: 12),
-                  const Expanded(
+                  SizedBox(width: 12),
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Credit / Debit Card', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('Gateway Simulation', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        Text('Credit / Debit Card'.tr(context), style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('Gateway Simulation'.tr(context), style: TextStyle(fontSize: 12, color: Colors.grey)),
                       ],
                     ),
                   ),
-                  const Icon(Icons.check_circle, color: Colors.green),
+                  Icon(Icons.check_circle, color: Colors.green),
                 ],
               ),
             ),
@@ -199,11 +200,11 @@ class _MerchantCheckoutScreenState extends State<MerchantCheckoutScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, -5))
           ],
         ),
         child: SafeArea(
@@ -212,13 +213,13 @@ class _MerchantCheckoutScreenState extends State<MerchantCheckoutScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 56),
+              minimumSize: Size(double.infinity, 56),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               elevation: 0,
             ),
             child: _isProcessing
-                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : Text('Pay BHD ${widget.price.toStringAsFixed(3)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : Text('Pay BHD ${widget.price.toStringAsFixed(3)}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
         ),
       ),

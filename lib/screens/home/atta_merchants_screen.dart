@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class AttaMerchantsScreen extends StatefulWidget {
-  const AttaMerchantsScreen({super.key});
+  AttaMerchantsScreen({super.key});
 
   @override
   State<AttaMerchantsScreen> createState() => _AttaMerchantsScreenState();
@@ -17,7 +19,7 @@ class _AttaMerchantsScreenState extends State<AttaMerchantsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Atta Merchants', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Atta Merchants'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -27,11 +29,11 @@ class _AttaMerchantsScreenState extends State<AttaMerchantsScreen> {
           // Search Header
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search by merchant name or category',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.grey[100],
                 border: OutlineInputBorder(
@@ -52,11 +54,11 @@ class _AttaMerchantsScreenState extends State<AttaMerchantsScreen> {
               stream: _firestore.collection('merchants').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
 
                 if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading merchants'));
+                  return Center(child: Text('Error loading merchants'.tr(context)));
                 }
 
                 var merchants = snapshot.data?.docs.map((d) {
@@ -84,15 +86,15 @@ class _AttaMerchantsScreenState extends State<AttaMerchantsScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.storefront, size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        const Text('No Merchants Found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        Text('No Merchants Found'.tr(context), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   );
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16),
                   itemCount: merchants.length,
                   itemBuilder: (context, index) {
                     final m = merchants[index];
@@ -116,11 +118,11 @@ class _AttaMerchantsScreenState extends State<AttaMerchantsScreen> {
         : 'Unknown location';
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
@@ -137,31 +139,31 @@ class _AttaMerchantsScreenState extends State<AttaMerchantsScreen> {
                     ? Image.network(
                         logoUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (c, e, s) => const Icon(Icons.store, color: Colors.grey),
+                        errorBuilder: (c, e, s) => Icon(Icons.store, color: Colors.grey),
                       )
-                    : const Icon(Icons.store, color: Colors.grey),
+                    : Icon(Icons.store, color: Colors.grey),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 4),
+                  Text(name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: Colors.indigo[50],
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(category, style: TextStyle(fontSize: 12, color: Colors.indigo[800], fontWeight: FontWeight.bold)),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Row(
                     children: [
                       Icon(Icons.location_on, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           address, 

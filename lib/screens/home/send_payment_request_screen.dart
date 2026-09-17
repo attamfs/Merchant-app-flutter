@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class SendPaymentRequestScreen extends StatefulWidget {
   final String merchantId;
@@ -10,7 +12,7 @@ class SendPaymentRequestScreen extends StatefulWidget {
   final String targetId;
   final String targetType; // 'customer' or 'merchant'
 
-  const SendPaymentRequestScreen({
+  SendPaymentRequestScreen({
     super.key,
     required this.merchantId,
     required this.targetId,
@@ -70,7 +72,7 @@ class _SendPaymentRequestScreenState extends State<SendPaymentRequestScreen> {
     
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid amount greater than 0')),
+        SnackBar(content: Text('Please enter a valid amount greater than 0'.tr(context))),
       );
       return;
     }
@@ -128,7 +130,7 @@ class _SendPaymentRequestScreenState extends State<SendPaymentRequestScreen> {
         Navigator.pop(context); // Go back to search screen
         Navigator.pop(context); // Go back to payment requests screen
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment request sent successfully!')),
+          SnackBar(content: Text('Payment request sent successfully!'.tr(context))),
         );
       }
     } catch (e) {
@@ -155,16 +157,16 @@ class _SendPaymentRequestScreenState extends State<SendPaymentRequestScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Send Payment Request', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Send Payment Request'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: _isLoadingProfile 
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -175,20 +177,20 @@ class _SendPaymentRequestScreenState extends State<SendPaymentRequestScreen> {
                       backgroundImage: NetworkImage(targetImageUrl.toString()),
                     )
                   else
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 40,
                       child: Icon(Icons.person, size: 40),
                     ),
                   
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   
                   Text(
                     targetName,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
                     textAlign: TextAlign.center,
                   ),
                   
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   
                   // Amount Field
                   Container(
@@ -197,37 +199,36 @@ class _SendPaymentRequestScreenState extends State<SendPaymentRequestScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.grey[300]!),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       children: [
                         Expanded(
                           child: TextField(
                             controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: TextInputType.numberWithOptions(decimal: true),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black87),
-                            decoration: const InputDecoration(
+                            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black87),
+                            decoration: InputDecoration(
                               hintText: '0.000',
                               border: InputBorder.none,
                             ),
                           ),
                         ),
-                        const Text(
-                          'BHD',
+                        Text('BHD',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
                         ),
                       ],
                     ),
                   ),
                   
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   
                   // Transaction Details
-                  const Align(
+                  Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Transaction Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    child: Text('Transaction Details'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   TextField(
                     controller: _notesController,
                     maxLines: 4,
@@ -246,7 +247,7 @@ class _SendPaymentRequestScreenState extends State<SendPaymentRequestScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   
                   // Cash Payment Allowed
                   Container(
@@ -261,29 +262,29 @@ class _SendPaymentRequestScreenState extends State<SendPaymentRequestScreen> {
                           _cashPaymentAllowed = val ?? false;
                         });
                       },
-                      title: const Text('Cash Payment Allowed?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      subtitle: const Text('Customer will be able to pay in cash.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      title: Text('Cash Payment Allowed?'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      subtitle: Text('Customer will be able to pay in cash.'.tr(context), style: TextStyle(fontSize: 12, color: Colors.grey)),
                       activeColor: Colors.green,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     ),
                   ),
                   
-                  const SizedBox(height: 48),
+                  SizedBox(height: 48),
                   
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1EBB5E), // Green
+                        backgroundColor: Color(0xFF1EBB5E), // Green
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
                       onPressed: _isLoading ? null : _createRequest,
                       child: _isLoading 
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Send Request', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text('Send Request'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],

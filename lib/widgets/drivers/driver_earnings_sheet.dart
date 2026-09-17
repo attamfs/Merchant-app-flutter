@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../../theme.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class DriverEarningsSheet extends StatefulWidget {
   final String driverId;
   final String driverName;
 
-  const DriverEarningsSheet({
+  DriverEarningsSheet({
     super.key,
     required this.driverId,
     required this.driverName,
@@ -84,7 +86,7 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -93,7 +95,7 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
         children: [
           _buildHeader(context),
           if (_isLoading)
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(40.0),
               child: Center(child: CircularProgressIndicator()),
             )
@@ -103,7 +105,7 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildSummaryCards(),
-                  const Divider(height: 1),
+                  Divider(height: 1),
                   _buildOrdersList(),
                 ],
               ),
@@ -115,8 +117,8 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
         color: AppTheme.primary,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -125,13 +127,12 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
         children: [
           Row(
             children: [
-              const Icon(Icons.account_balance_wallet, color: Colors.white),
-              const SizedBox(width: 12),
+              Icon(Icons.account_balance_wallet, color: Colors.white),
+              SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Driver Earnings',
+                  Text('Driver Earnings'.tr(context),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -150,7 +151,7 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+            icon: Icon(Icons.close, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -160,12 +161,12 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
 
   Widget _buildSummaryCards() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       child: Row(
         children: [
           Expanded(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(16),
@@ -174,17 +175,15 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Total Deliveries',
+                  Text('Total Deliveries'.tr(context),
                     style: TextStyle(
                       color: Colors.grey.shade600,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_deliveredOrders.length}',
-                    style: const TextStyle(
+                  SizedBox(height: 8),
+                  Text('${_deliveredOrders.length}',
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -193,10 +192,10 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Expanded(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppTheme.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(16),
@@ -205,17 +204,15 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Fees Generated',
+                  Text('Fees Generated'.tr(context),
                     style: TextStyle(
                       color: AppTheme.primary.withOpacity(0.8),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_totalEarnings.toStringAsFixed(3)} BHD',
-                    style: const TextStyle(
+                  SizedBox(height: 8),
+                  Text('${_totalEarnings.toStringAsFixed(3)} BHD',
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primary,
@@ -233,13 +230,12 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
   Widget _buildOrdersList() {
     if (_deliveredOrders.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: EdgeInsets.all(40.0),
         child: Column(
           children: [
             Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text(
-              'No completed deliveries found.',
+            SizedBox(height: 16),
+            Text('No completed deliveries found.'.tr(context),
               style: TextStyle(color: Colors.grey.shade500),
             ),
           ],
@@ -252,7 +248,7 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
         maxHeight: MediaQuery.of(context).size.height * 0.4,
       ),
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         shrinkWrap: true,
         itemCount: _deliveredOrders.length,
         itemBuilder: (context, index) {
@@ -262,8 +258,8 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
               : (order['deliveryFee'] ?? 0.0) as double;
               
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12),
+            margin: EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -272,28 +268,27 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
                 BoxShadow(
                   color: Colors.black.withOpacity(0.02),
                   blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  offset: Offset(0, 2),
                 ),
               ],
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.check_circle, size: 20, color: Colors.green.shade600),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Order #${order['id']}',
-                        style: const TextStyle(
+                      Text('Order #${order['id']}',
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -309,15 +304,14 @@ class _DriverEarningsSheetState extends State<DriverEarningsSheet> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
                   ),
-                  child: Text(
-                    '+${fee.toStringAsFixed(3)} BHD',
-                    style: const TextStyle(
+                  child: Text('+${fee.toStringAsFixed(3)} BHD',
+                    style: TextStyle(
                       color: AppTheme.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 13,

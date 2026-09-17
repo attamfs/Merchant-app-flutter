@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DashboardMainActions extends StatelessWidget {
-  const DashboardMainActions({super.key});
+  DashboardMainActions({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-      offset: const Offset(0, -20),
+      offset: Offset(0, -20),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        margin: EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -17,7 +17,7 @@ class DashboardMainActions extends StatelessWidget {
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
-              offset: const Offset(0, 5),
+              offset: Offset(0, 5),
             ),
           ],
         ),
@@ -62,7 +62,7 @@ class DashboardMainActions extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
@@ -73,12 +73,12 @@ class DashboardMainActions extends StatelessWidget {
               size: 24,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           SizedBox(
             width: 70,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),

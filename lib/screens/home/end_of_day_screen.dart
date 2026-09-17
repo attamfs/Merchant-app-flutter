@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/auth_service.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class EndOfDayScreen extends StatefulWidget {
   final String merchantId;
   final Map<String, dynamic>? cashierData;
 
-  const EndOfDayScreen({
+  EndOfDayScreen({
     super.key,
     required this.merchantId,
     this.cashierData,
@@ -94,7 +96,7 @@ class _EndOfDayScreenState extends State<EndOfDayScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading sales: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading sales: $e'.tr(context))));
         setState(() => _isLoading = false);
       }
     }
@@ -134,7 +136,7 @@ class _EndOfDayScreenState extends State<EndOfDayScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to close shift: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to close shift: $e'.tr(context))));
         setState(() => _isClosing = false);
       }
     }
@@ -143,26 +145,26 @@ class _EndOfDayScreenState extends State<EndOfDayScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('End of Day'),
+        title: Text('End of Day'.tr(context)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
@@ -170,21 +172,20 @@ class _EndOfDayScreenState extends State<EndOfDayScreen> {
               ),
               child: Column(
                 children: [
-                  const Text('Total Digital Sales Today', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${_totalDigitalSales.toStringAsFixed(3)} BHD',
-                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
+                  Text('Total Digital Sales Today'.tr(context), style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  SizedBox(height: 8),
+                  Text('${_totalDigitalSales.toStringAsFixed(3)} BHD',
+                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
                   ),
-                  const SizedBox(height: 4),
-                  Text('$_transactionCount Transactions', style: const TextStyle(color: Colors.grey)),
+                  SizedBox(height: 4),
+                  Text("$_transactionCount ${'Transactions'.tr(context)}", style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             if (_paymentBreakdown.isNotEmpty) ...[
-              const Text('Payment Breakdown', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
+              Text('Payment Breakdown'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -195,15 +196,15 @@ class _EndOfDayScreenState extends State<EndOfDayScreen> {
                   children: _paymentBreakdown.entries.map((e) {
                     return ListTile(
                       title: Text(e.key),
-                      trailing: Text('${e.value.toStringAsFixed(3)} BHD', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      trailing: Text('${e.value.toStringAsFixed(3)} BHD', style: TextStyle(fontWeight: FontWeight.bold)),
                     );
                   }).toList(),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
             ],
-            const Text('Notes (Optional)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
+            Text('Notes (Optional)'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 12),
             TextField(
               controller: _notesController,
               maxLines: 3,
@@ -221,7 +222,7 @@ class _EndOfDayScreenState extends State<EndOfDayScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             SizedBox(
               height: 56,
               child: ElevatedButton(
@@ -233,8 +234,8 @@ class _EndOfDayScreenState extends State<EndOfDayScreen> {
                 ),
                 onPressed: _isClosing ? null : _closeShift,
                 child: _isClosing
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Close Shift & Logout', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text('Close Shift & Logout'.tr(context), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

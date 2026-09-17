@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'theme.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/mobile_verification_screen.dart';
+import 'screens/auth/merchant_registration_screen.dart';
 import 'screens/auth/set_pin_screen.dart';
 import 'screens/auth/forgot_pin_screen.dart';
 import 'screens/auth/forgot_pin_reset_screen.dart';
@@ -14,6 +15,7 @@ import 'widgets/auto_logout_wrapper.dart';
 import 'screens/splash/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/translation_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,14 +35,21 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProxyProvider<LanguageProvider, TranslationProvider>(
+          create: (_) => TranslationProvider(),
+          update: (_, languageProvider, translationProvider) =>
+              translationProvider!..updateLanguage(languageProvider),
+        ),
       ],
-      child: const MyApp(),
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -50,25 +59,32 @@ class MyApp extends StatelessWidget {
         final textDirection = isRtl ? TextDirection.rtl : TextDirection.ltr;
 
         return MaterialApp(
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
           title: 'ATTA Merchant App',
           theme: AppTheme.lightTheme,
-          home: const SplashScreen(),
+          home: SplashScreen(),
           builder: (context, child) {
-            return Directionality(
-              textDirection: textDirection,
-              child: AutoLogoutWrapper(
-                child: AppLockWrapper(child: child!),
+            return GestureDetector(
+              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+              behavior: HitTestBehavior.opaque,
+              child: Directionality(
+                textDirection: textDirection,
+                child: AutoLogoutWrapper(
+                  child: AppLockWrapper(child: child!),
+                ),
               ),
             );
           },
           routes: {
-            '/auth': (context) => const AuthWrapper(),
-            '/login': (context) => const LoginScreen(),
-            '/register': (context) => const MobileVerificationScreen(),
-            '/forgot-pin': (context) => const ForgotPinScreen(),
-            '/forgot-pin/reset': (context) => const ForgotPinResetScreen(),
-            '/set-pin': (context) => const SetPinScreen(),
-            '/dashboard': (context) => const DashboardScreen(),
+            '/auth': (context) => AuthWrapper(),
+            '/login': (context) => LoginScreen(),
+            '/register': (context) => MobileVerificationScreen(),
+            '/register-form': (context) => const MerchantRegistrationScreen(),
+            '/forgot-pin': (context) => ForgotPinScreen(),
+            '/forgot-pin/reset': (context) => ForgotPinResetScreen(),
+            '/set-pin': (context) => SetPinScreen(),
+            '/dashboard': (context) => DashboardScreen(),
           },
         );
       },
@@ -77,7 +93,7 @@ class MyApp extends StatelessWidget {
 }
 
 class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
+  AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +101,14 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
+          return Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
         if (snapshot.hasData) {
-          return const DashboardScreen();
+          return DashboardScreen();
         }
-        return const LoginScreen();
+        return LoginScreen();
       },
     );
   }

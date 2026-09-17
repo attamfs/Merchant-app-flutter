@@ -14,13 +14,15 @@ import '../../screens/home/admin_requests_screen.dart';
 import '../../screens/home/manage_cashiers_screen.dart';
 import '../../screens/home/manage_drivers_screen.dart';
 import '../../screens/home/cashier_sales_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class MerchantServicesGrid extends StatefulWidget {
   final bool isCashier;
   final String? merchantId;
   final VoidCallback? onEndOfDay;
 
-  const MerchantServicesGrid({
+  MerchantServicesGrid({
     super.key,
     this.isCashier = false,
     this.merchantId,
@@ -36,18 +38,17 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Our Services',
+          Text('Our Services'.tr(context),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance.collection('settings').doc('display').snapshots(),
             builder: (context, snapshot) {
@@ -60,7 +61,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
               return GridView.count(
                 crossAxisCount: 4,
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 children: [
@@ -70,7 +71,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const MyStoreScreen()),
+                        MaterialPageRoute(builder: (context) => MyStoreScreen()),
                       );
                     },
                   ),
@@ -80,7 +81,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const AttaMerchantsScreen()),
+                        MaterialPageRoute(builder: (context) => AttaMerchantsScreen()),
                       );
                     },
                   ),
@@ -90,7 +91,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const VouchersScreen()),
+                        MaterialPageRoute(builder: (context) => VouchersScreen()),
                       );
                     },
                   ),
@@ -120,7 +121,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const PromotionsScreen()),
+                        MaterialPageRoute(builder: (context) => PromotionsScreen()),
                       );
                     },
                   ),
@@ -130,7 +131,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RegisterUserScreen()),
+                        MaterialPageRoute(builder: (context) => RegisterUserScreen()),
                       );
                     },
                   ),
@@ -140,7 +141,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const MyPackageScreen()),
+                        MaterialPageRoute(builder: (context) => MyPackageScreen()),
                       );
                     },
                   ),
@@ -150,7 +151,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const AdminRequestsScreen()),
+                        MaterialPageRoute(builder: (context) => AdminRequestsScreen()),
                       );
                     },
                   ),
@@ -160,7 +161,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ManageOrdersScreen()),
+                        MaterialPageRoute(builder: (context) => ManageOrdersScreen()),
                       );
                     },
                   ),
@@ -170,7 +171,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ManageDriversScreen()),
+                        MaterialPageRoute(builder: (context) => ManageDriversScreen()),
                       );
                     },
                   ),
@@ -190,7 +191,7 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ManageCashiersScreen()),
+                        MaterialPageRoute(builder: (context) => ManageCashiersScreen()),
                       );
                     },
                   ),
@@ -220,22 +221,22 @@ class _MerchantServicesGridState extends State<MerchantServicesGrid> {
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 4,
-              offset: const Offset(0, 2),
+              offset: Offset(0, 2),
             ),
           ],
         ),
-        padding: const EdgeInsets.all(8),
+        padding: EdgeInsets.all(8),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: Colors.green, size: 28),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
-              label,
+              label.tr(context),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
                 color: Colors.black87,

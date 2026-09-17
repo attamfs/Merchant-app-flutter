@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import '../home/my_store_screen.dart';
 import '../auth/forgot_pin_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
+  AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Account', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Account'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -27,22 +29,22 @@ class AccountScreen extends StatelessWidget {
             children: [
               _buildSettingsItem(
                 icon: Icons.store,
-                title: 'My Store',
+                title: 'My Store'.tr(context),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const MyStoreScreen()),
+                    MaterialPageRoute(builder: (_) => MyStoreScreen()),
                   );
                 },
               ),
-              const Divider(height: 1),
+              Divider(height: 1),
               _buildSettingsItem(
                 icon: Icons.password,
-                title: 'Reset PIN',
+                title: 'Reset PIN'.tr(context),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const ForgotPinScreen()),
+                    MaterialPageRoute(builder: (_) => ForgotPinScreen()),
                   );
                 },
               ),
@@ -62,9 +64,9 @@ class AccountScreen extends StatelessWidget {
       leading: Icon(icon, color: Colors.grey[600]),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+      trailing: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
       onTap: onTap,
     );
   }

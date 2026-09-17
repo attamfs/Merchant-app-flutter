@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/field_label.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class RegisterUserScreen extends StatefulWidget {
-  const RegisterUserScreen({super.key});
+  RegisterUserScreen({super.key});
 
   @override
   State<RegisterUserScreen> createState() => _RegisterUserScreenState();
@@ -101,7 +103,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Registration Failed: $e'),
+          content: Text('Registration Failed: $e'.tr(context)),
           backgroundColor: Colors.red,
         ));
       }
@@ -119,40 +121,40 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Admin: Create Merchant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Admin: Create Merchant'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.shield, size: 48, color: Theme.of(context).primaryColor),
               ),
-              const SizedBox(height: 16),
-              const Text('Register a new merchant account directly.', style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 32),
+              SizedBox(height: 16),
+              Text('Register a new merchant account directly.'.tr(context), style: TextStyle(color: Colors.grey)),
+              SizedBox(height: 32),
               
               TextFormField(
                 controller: _businessNameCtrl,
                 decoration: InputDecoration(
-                  label: const FieldLabel(text: 'Business Name'),
+                  label: FieldLabel(text: 'Business Name'),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               
               Row(
                 children: [
@@ -160,7 +162,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                     child: TextFormField(
                       controller: _crNumberCtrl,
                       decoration: InputDecoration(
-                        label: const FieldLabel(text: 'CR Number'),
+                        label: FieldLabel(text: 'CR Number'),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -168,12 +170,12 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                       validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Expanded(
                     child: TextFormField(
                       controller: _branchNumberCtrl,
                       decoration: InputDecoration(
-                        label: const FieldLabel(text: 'Branch Number'),
+                        label: FieldLabel(text: 'Branch Number'),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -183,7 +185,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               
               TextFormField(
                 controller: _pinCtrl,
@@ -191,14 +193,14 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                 obscureText: true,
                 maxLength: 4,
                 decoration: InputDecoration(
-                  label: const FieldLabel(text: '4-Digit PIN'),
+                  label: FieldLabel(text: '4-Digit PIN'),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
                 validator: (v) => v == null || v.length != 4 ? 'Requires 4 digits' : null,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               
               SizedBox(
                 width: double.infinity,
@@ -209,8 +211,8 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isSubmitting
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Create Merchant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Create Merchant'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ),
             ],

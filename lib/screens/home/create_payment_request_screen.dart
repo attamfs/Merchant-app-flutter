@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:async';
 import 'send_payment_request_screen.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class CreatePaymentRequestScreen extends StatefulWidget {
   final String merchantId;
@@ -10,7 +12,7 @@ class CreatePaymentRequestScreen extends StatefulWidget {
   final String? cashierId;
   final String? counterNumber;
 
-  const CreatePaymentRequestScreen({
+  CreatePaymentRequestScreen({
     super.key,
     required this.merchantId,
     this.isCashier = false,
@@ -53,7 +55,7 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
 
   void _onSearchChanged() {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 600), () {
+    _debounce = Timer(Duration(milliseconds: 600), () {
       _performSearch();
     });
   }
@@ -155,9 +157,9 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
           _selectTarget(data, 'customer');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid QR Code')),
+            SnackBar(content: Text('Invalid QR Code'.tr(context))),
           );
-          Future.delayed(const Duration(seconds: 2), () {
+          Future.delayed(Duration(seconds: 2), () {
             if (mounted) setState(() => _isScanning = true);
           });
         }
@@ -171,22 +173,22 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
     return Scaffold(
       backgroundColor: Colors.grey[200], // Match web app background
       appBar: AppBar(
-        title: const Text('New Payment Request', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('New Payment Request'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Column(
         children: [
           // Search Bar Section
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey[300]!),
                     borderRadius: BorderRadius.circular(8),
@@ -197,7 +199,7 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                       items: _countryCodes.map((String code) {
                         return DropdownMenuItem<String>(
                           value: code,
-                          child: Text(code),
+                          child: Text('${{'+973':'🇧🇭','+966':'🇸🇦','+974':'🇶🇦','+965':'🇰🇼','+968':'🇴🇲','+971':'🇦🇪'}[code] ?? ""} \u200E$code', textDirection: TextDirection.ltr),
                         );
                       }).toList(),
                       onChanged: (String? newValue) {
@@ -211,7 +213,7 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: _phoneController,
@@ -220,7 +222,7 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                       hintText: 'Enter Contact Number',
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: Colors.grey[300]!),
@@ -229,7 +231,7 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide(color: Colors.grey[300]!),
                       ),
-                      suffixIcon: const Icon(Icons.search, color: Colors.grey),
+                      suffixIcon: Icon(Icons.search, color: Colors.grey),
                     ),
                   ),
                 ),
@@ -241,11 +243,11 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
           if (_phoneController.text.trim().length >= 3)
             Expanded(
               child: _isSearching
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator())
                   : _searchResults.isEmpty
-                      ? const Center(child: Text('No results found.', style: TextStyle(color: Colors.grey)))
+                      ? Center(child: Text('No results found.'.tr(context), style: TextStyle(color: Colors.grey)))
                       : ListView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(16),
                           itemCount: _searchResults.length,
                           itemBuilder: (context, index) {
                             final result = _searchResults[index];
@@ -254,7 +256,7 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                             
                             return Card(
                               elevation: 0,
-                              margin: const EdgeInsets.only(bottom: 8),
+                              margin: EdgeInsets.only(bottom: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 side: BorderSide(color: Colors.grey[200]!),
@@ -263,29 +265,29 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                                 onTap: () => _selectTarget(result['id'], type),
                                 leading: imageUrl != null && imageUrl.toString().isNotEmpty
                                     ? CircleAvatar(backgroundImage: NetworkImage(imageUrl))
-                                    : const CircleAvatar(child: Icon(Icons.person)),
+                                    : CircleAvatar(child: Icon(Icons.person)),
                                 title: Row(
                                   children: [
                                     Expanded(
                                       child: Text(
                                         result['name'],
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                     if (type == 'merchant')
                                       Container(
-                                        margin: const EdgeInsets.only(left: 8),
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        margin: EdgeInsets.only(left: 8),
+                                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                         decoration: BoxDecoration(
                                           color: Colors.green.withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(12),
                                         ),
-                                        child: const Text('Merchant', style: TextStyle(color: Colors.green, fontSize: 10)),
+                                        child: Text('Merchant'.tr(context), style: TextStyle(color: Colors.green, fontSize: 10)),
                                       ),
                                   ],
                                 ),
-                                subtitle: Text(result['phone'], style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                subtitle: Text(result['phone'], style: TextStyle(fontSize: 12, color: Colors.grey)),
                               ),
                             );
                           },
@@ -298,11 +300,10 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Or scan QR Code to Send Request',
+                    Text('Or scan QR Code to Send Request'.tr(context),
                       style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                     Container(
                       width: 250,
                       height: 250,
@@ -320,8 +321,8 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                           : Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.camera_alt, color: Colors.white, size: 48),
-                                const SizedBox(height: 16),
+                                Icon(Icons.camera_alt, color: Colors.white, size: 48),
+                                SizedBox(height: 16),
                                 ElevatedButton(
                                   onPressed: () {
                                     setState(() {
@@ -332,7 +333,7 @@ class _CreatePaymentRequestScreenState extends State<CreatePaymentRequestScreen>
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.black,
                                   ),
-                                  child: const Text('Start Camera'),
+                                  child: Text('Start Camera'.tr(context)),
                                 ),
                               ],
                             ),

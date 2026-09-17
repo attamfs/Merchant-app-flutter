@@ -5,26 +5,67 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../services/auth_service.dart';
 import '../../models/merchant_user.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
+import '../../providers/language_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  Widget _buildLanguageSwitcher(BuildContext context) {
+    final langProvider = Provider.of<LanguageProvider>(context);
+    final currentLang = langProvider.currentLanguage;
+    String langName = 'English';
+    if (currentLang == 'ar') langName = 'العربية';
+    else if (currentLang == 'hi') langName = 'हिंदी';
+    else if (currentLang == 'ur') langName = 'اردو';
+
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        langProvider.setLanguage(value);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            Icon(Icons.language, size: 20, color: Theme.of(context).colorScheme.primary),
+            SizedBox(width: 4),
+            Text(langName, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+      itemBuilder: (context) => [
+        PopupMenuItem(value: 'en', child: Text('English')),
+        PopupMenuItem(value: 'ar', child: Text('العربية')),
+        PopupMenuItem(value: 'hi', child: Text('हिंदी')),
+        PopupMenuItem(value: 'ur', child: Text('اردو')),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          _buildLanguageSwitcher(context),
+        ],
+      ),
       body: SafeArea(
         child: DefaultTabController(
           length: 2,
           child: Column(
             children: [
-              const SizedBox(height: 48),
+              SizedBox(height: 48),
               // Icon
               Container(
                 width: 80,
@@ -39,22 +80,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Merchant Log In',
+              SizedBox(height: 24),
+              Text('Merchant Log In'.tr(context),
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 24),
-              const TabBar(
+              SizedBox(height: 24),
+              TabBar(
                 tabs: [
-                  Tab(text: 'Supervisor'),
-                  Tab(text: 'Cashier'),
+                  Tab(text: 'Supervisor'.tr(context)),
+                  Tab(text: 'Cashier'.tr(context)),
                 ],
               ),
-              const Expanded(
+              Expanded(
                 child: TabBarView(
                   children: [
                     _SupervisorLoginForm(),
@@ -114,7 +154,7 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
 
     if (cr.isEmpty || pin.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid CR Number and 4-digit PIN')),
+        SnackBar(content: Text('Please enter a valid CR Number and 4-digit PIN'.trRead(context))),
       );
       return;
     }
@@ -135,13 +175,13 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
         if (merchantUser?.role == MerchantRole.unauthorized) {
           await authService.logout();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Access Denied: You do not have Merchant or Cashier privileges.')),
+            SnackBar(content: Text('Access Denied: You do not have Merchant or Cashier privileges.'.trRead(context))),
           );
           setState(() => _isLoading = false);
           return;
         }
 
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        // We do not need pushReplacementNamed because AuthWrapper handles auth state changes
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -165,7 +205,7 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(24.0),
       child: Column(
         children: [
           RawAutocomplete<String>(
@@ -184,7 +224,7 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
               return CustomTextField(
                 controller: controller,
                 focusNode: focusNode,
-                hintText: 'Enter your CR Number',
+                hintText: 'Enter your CR Number'.tr(context),
                 keyboardType: TextInputType.text,
               );
             },
@@ -195,7 +235,7 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
                   elevation: 4.0,
                   borderRadius: BorderRadius.circular(8),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 200, maxWidth: 250),
+                    constraints: BoxConstraints(maxHeight: 200, maxWidth: 250),
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
@@ -207,7 +247,7 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
                             onSelected(option);
                           },
                           child: Padding(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: EdgeInsets.all(16.0),
                             child: Text(option),
                           ),
                         );
@@ -218,10 +258,10 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
               );
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           CustomTextField(
             controller: _pinController,
-            hintText: 'Enter 4-digit PIN',
+            hintText: 'Enter 4-digit PIN'.tr(context),
             keyboardType: TextInputType.number,
             obscureText: _obscurePin,
             maxLength: 4,
@@ -230,11 +270,40 @@ class _SupervisorLoginFormState extends State<_SupervisorLoginForm> {
               onPressed: () => setState(() => _obscurePin = !_obscurePin),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           CustomButton(
-            text: 'Login',
+            text: 'Login'.tr(context),
             isLoading: _isLoading,
             onPressed: _login,
+          ),
+          SizedBox(height: 16),
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/forgot-pin');
+            },
+            child: Text('Forgot PIN?'.tr(context),
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            ),
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("${"Don't have an account?".tr(context)} ",
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: Text('Register Now'.tr(context),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -305,7 +374,7 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
 
     if (cr.isEmpty || counter.isEmpty || employee.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        SnackBar(content: Text('Please fill all fields'.trRead(context))),
       );
       return;
     }
@@ -330,13 +399,13 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
         if (merchantUser?.role == MerchantRole.unauthorized) {
           await authService.logout();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Access Denied: You do not have Cashier privileges.')),
+            SnackBar(content: Text('Access Denied: You do not have Cashier privileges.'.trRead(context))),
           );
           setState(() => _isLoading = false);
           return;
         }
 
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        // We do not need pushReplacementNamed because AuthWrapper handles auth state changes
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -395,7 +464,7 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
             elevation: 4.0,
             borderRadius: BorderRadius.circular(8),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 200, maxWidth: 250),
+              constraints: BoxConstraints(maxHeight: 200, maxWidth: 250),
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
@@ -407,7 +476,7 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
                       onSelected(option);
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: EdgeInsets.all(16.0),
                       child: Text(option),
                     ),
                   );
@@ -423,43 +492,43 @@ class _CashierLoginFormState extends State<_CashierLoginForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(24.0),
       child: Column(
         children: [
           _buildAutocompleteField(
             controller: _crController,
             focusNode: _crFocusNode,
-            hintText: 'Merchant CR Number',
+            hintText: 'Merchant CR Number'.tr(context),
             optionsList: _savedCRNumbers,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildAutocompleteField(
             controller: _counterController,
             focusNode: _counterFocusNode,
-            hintText: 'Cashier Counter Number',
+            hintText: 'Cashier Counter Number'.tr(context),
             optionsList: _savedCounterNumbers,
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildAutocompleteField(
             controller: _employeeController,
             focusNode: _employeeFocusNode,
-            hintText: 'Employee Number',
+            hintText: 'Employee Number'.tr(context),
             optionsList: _savedEmployeeNumbers,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           CustomTextField(
             controller: _passwordController,
-            hintText: 'Enter Password',
+            hintText: 'Enter Password'.tr(context),
             obscureText: _obscurePassword,
             suffixIcon: IconButton(
               icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           CustomButton(
-            text: 'Login',
+            text: 'Login'.tr(context),
             isLoading: _isLoading,
             onPressed: _login,
           ),

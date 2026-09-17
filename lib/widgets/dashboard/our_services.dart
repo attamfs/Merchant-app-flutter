@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class DashboardOurServices extends StatelessWidget {
-  const DashboardOurServices({super.key});
+  DashboardOurServices({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,22 +21,21 @@ class DashboardOurServices extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Our Services',
+          Text('Our Services'.tr(context),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           GridView.builder(
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
@@ -66,7 +67,7 @@ class DashboardOurServices extends StatelessWidget {
         onTap: () {},
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(4.0),
+          padding: EdgeInsets.all(4.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -75,10 +76,10 @@ class DashboardOurServices extends StatelessWidget {
                 color: theme.colorScheme.primary,
                 size: 24,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w500,
                 ),

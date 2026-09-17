@@ -3,9 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../../widgets/drivers/driver_earnings_sheet.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ManageDriversScreen extends StatefulWidget {
-  const ManageDriversScreen({super.key});
+  ManageDriversScreen({super.key});
 
   @override
   State<ManageDriversScreen> createState() => _ManageDriversScreenState();
@@ -64,7 +66,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Driver updated successfully!')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Driver updated successfully!'.tr(context))));
           _resetForm();
         }
       } else {
@@ -115,7 +117,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
         await _firestore.collection('users').doc(driverUid).set(driverData);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Driver registered successfully!')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Driver registered successfully!'.tr(context))));
           _resetForm();
         }
       }
@@ -125,7 +127,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save driver: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save driver: $e'.tr(context))));
       }
     } finally {
       if (mounted) {
@@ -176,17 +178,17 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Driver'),
-        content: const Text('Are you sure you want to delete this driver?'),
+        title: Text('Delete Driver'.tr(context)),
+        content: Text('Are you sure you want to delete this driver?'.tr(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr(context)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text('Delete'.tr(context)),
           ),
         ],
       ),
@@ -202,14 +204,14 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
         // ignore
       }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Driver deleted')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Driver deleted'.tr(context))));
         if (_editingDriverId == docId) {
           _resetForm();
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete: $e'.tr(context))));
       }
     }
   }
@@ -220,25 +222,24 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Drivers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Manage Drivers'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: merchantId == null
-          ? const Center(child: Text('Not authenticated'))
+          ? Center(child: Text('Not authenticated'.tr(context)))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildForm(),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Your Drivers',
+                  SizedBox(height: 32),
+                  Text('Your Drivers'.tr(context),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _buildDriversList(merchantId),
                 ],
               ),
@@ -251,7 +252,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -259,59 +260,59 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
             children: [
               Text(
                 _editingDriverId != null ? 'Edit Driver' : 'Register New Driver',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       initialValue: _firstName,
-                      decoration: const InputDecoration(labelText: 'First Name', border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: 'First Name', border: OutlineInputBorder()),
                       validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                       onSaved: (val) => _firstName = val ?? '',
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
                       initialValue: _middleName,
-                      decoration: const InputDecoration(labelText: 'Middle Name (Opt)', border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: 'Middle Name (Opt)', border: OutlineInputBorder()),
                       onSaved: (val) => _middleName = val ?? '',
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: _lastName,
-                decoration: const InputDecoration(labelText: 'Last Name', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: 'Last Name', border: OutlineInputBorder()),
                 validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                 onSaved: (val) => _lastName = val ?? '',
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: _email,
-                decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
                 keyboardType: TextInputType.emailAddress,
                 onSaved: (val) => _email = val ?? '',
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 children: [
                   SizedBox(
                     width: 90,
                     child: TextFormField(
                       initialValue: _countryCode,
-                      decoration: const InputDecoration(labelText: 'Code', border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: 'Code', border: OutlineInputBorder()),
                       onSaved: (val) => _countryCode = val ?? '+973',
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
                       initialValue: _phone,
-                      decoration: const InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: 'Phone Number', border: OutlineInputBorder()),
                       keyboardType: TextInputType.phone,
                       validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                       onSaved: (val) => _phone = val ?? '',
@@ -319,24 +320,24 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               if (_editingDriverId == null) ...[
                 TextFormField(
                   initialValue: _pin,
-                  decoration: const InputDecoration(labelText: '4-Digit PIN', border: OutlineInputBorder()),
+                  decoration: InputDecoration(labelText: '4-Digit PIN', border: OutlineInputBorder()),
                   keyboardType: TextInputType.number,
                   maxLength: 4,
                   validator: (val) => val == null || val.length != 4 ? 'Enter 4 digit PIN' : null,
                   onSaved: (val) => _pin = val ?? '',
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
               ],
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _vehicleType,
-                      decoration: const InputDecoration(labelText: 'Vehicle Type', border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: 'Vehicle Type', border: OutlineInputBorder()),
                       items: ['Car', 'Motorcycle', 'Van', 'Truck']
                           .map((type) => DropdownMenuItem(value: type, child: Text(type)))
                           .toList(),
@@ -348,29 +349,29 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               TextFormField(
                 initialValue: _vehicleDetails,
-                decoration: const InputDecoration(labelText: 'Vehicle Details (e.g. Plate #)', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: 'Vehicle Details (e.g. Plate #)', border: OutlineInputBorder()),
                 onSaved: (val) => _vehicleDetails = val ?? '',
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Row(
                 children: [
                   if (_editingDriverId != null) ...[
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _resetForm,
-                        child: const Text('Cancel Edit'),
+                        child: Text('Cancel Edit'.tr(context)),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16),
                   ],
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isCreating ? null : _submitDriver,
                       child: _isCreating
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                           : Text(_editingDriverId != null ? 'Update Driver' : 'Register Driver'),
                     ),
                   ),
@@ -388,10 +389,10 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
       stream: _firestore.collection('drivers').where('merchantId', isEqualTo: merchantId).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(child: Text('Error loading drivers'));
+          return Center(child: Text('Error loading drivers'.tr(context)));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
 
         final docs = snapshot.data?.docs ?? [];
@@ -399,9 +400,8 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
           return Card(
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
-              child: const Text(
-                'No drivers found. Register one above.',
+              padding: EdgeInsets.all(24.0),
+              child: Text('No drivers found. Register one above.'.tr(context),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
@@ -411,25 +411,25 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
 
         return ListView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+          physics: NeverScrollableScrollPhysics(),
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final doc = docs[index];
             final data = doc.data() as Map<String, dynamic>;
             
             return Card(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: EdgeInsets.only(bottom: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   child: Icon(Icons.local_shipping, color: Theme.of(context).primaryColor),
                 ),
-                title: Text(data['name'] ?? 'Unknown Driver', style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(data['name'] ?? 'Unknown Driver', style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text('${data['vehicleType']} • ${data['vehicleDetails'] ?? 'No details'}'),
                     Text('${data['phone']}'),
                   ],
@@ -439,7 +439,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.account_balance_wallet, color: Colors.green),
+                      icon: Icon(Icons.account_balance_wallet, color: Colors.green),
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
@@ -453,11 +453,11 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      icon: Icon(Icons.edit, color: Colors.blue),
                       onPressed: () => _editDriver(data, doc.id),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: Icon(Icons.delete, color: Colors.red),
                       onPressed: () => _deleteDriver(doc.id),
                     ),
                   ],

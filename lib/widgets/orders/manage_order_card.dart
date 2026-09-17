@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class ManageOrderCard extends StatelessWidget {
   final String orderId;
   final Map<String, dynamic> orderData;
   final List<Map<String, dynamic>> drivers;
 
-  const ManageOrderCard({
+  ManageOrderCard({
     super.key,
     required this.orderId,
     required this.orderData,
@@ -18,11 +20,11 @@ class ManageOrderCard extends StatelessWidget {
     try {
       await FirebaseFirestore.instance.collection('orders').doc(orderId).update({'status': newStatus});
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Order status changed to $newStatus.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Order status changed to $newStatus.'.tr(context))));
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Update failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Update failed: $e'.tr(context))));
       }
     }
   }
@@ -31,12 +33,12 @@ class ManageOrderCard extends StatelessWidget {
     try {
       await FirebaseFirestore.instance.collection('orders').doc(orderId).update({'driverId': driverId});
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Driver has been assigned.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Driver has been assigned.'.tr(context))));
         Navigator.pop(context); // Close dialog
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Assignment failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Assignment failed: $e'.tr(context))));
       }
     }
   }
@@ -46,18 +48,18 @@ class ManageOrderCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Select a Driver'),
+          title: Text('Select a Driver'.tr(context)),
           content: SizedBox(
             width: double.maxFinite,
             child: drivers.isEmpty
-                ? const Text('No drivers registered yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))
+                ? Text('No drivers registered yet.'.tr(context), textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))
                 : ListView.builder(
                     shrinkWrap: true,
                     itemCount: drivers.length,
                     itemBuilder: (context, index) {
                       final driver = drivers[index];
                       return ListTile(
-                        leading: const Icon(Icons.local_shipping),
+                        leading: Icon(Icons.local_shipping),
                         title: Text(driver['name'] ?? 'Unknown Driver'),
                         onTap: () => _assignDriver(context, driver['id']),
                       );
@@ -67,7 +69,7 @@ class ManageOrderCard extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('Cancel'.tr(context)),
             ),
           ],
         );
@@ -86,14 +88,14 @@ class ManageOrderCard extends StatelessWidget {
       case 'Cancelled': color = Colors.red; break;
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         status,
-        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -123,7 +125,7 @@ class ManageOrderCard extends StatelessWidget {
     final assignedDriver = drivers.where((d) => d['id'] == assignedDriverId).firstOrNull;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16),
       color: Colors.white,
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -131,7 +133,7 @@ class ManageOrderCard extends StatelessWidget {
         side: BorderSide(color: Colors.grey.withOpacity(0.2)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -143,15 +145,15 @@ class ManageOrderCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      const SizedBox(height: 2),
-                      Text('Order #$orderId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                      const SizedBox(height: 4),
+                      Text(customerName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      SizedBox(height: 2),
+                      Text("${'Order'.tr(context)} #$orderId", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(dateStr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          Icon(Icons.access_time, size: 14, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text(dateStr, style: TextStyle(fontSize: 12, color: Colors.grey)),
                         ],
                       ),
                     ],
@@ -159,51 +161,51 @@ class ManageOrderCard extends StatelessWidget {
                 ),
                 _buildStatusBadge(status),
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert),
+                  icon: Icon(Icons.more_vert),
                   onSelected: (newStatus) => _updateOrderStatus(context, newStatus),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(enabled: false, child: Text('Change Status', style: TextStyle(fontWeight: FontWeight.bold))),
-                    const PopupMenuDivider(),
-                    const PopupMenuItem(value: 'Pending', child: Text('Pending')),
-                    const PopupMenuItem(value: 'Preparing', child: Text('Preparing')),
-                    const PopupMenuItem(value: 'Ready for Delivery', child: Text('Ready for Delivery')),
-                    const PopupMenuItem(value: 'Out for Delivery', child: Text('Out for Delivery')),
-                    const PopupMenuItem(value: 'Delivered', child: Text('Delivered')),
-                    const PopupMenuDivider(),
-                    const PopupMenuItem(value: 'Cancelled', child: Text('Cancel Order', style: TextStyle(color: Colors.red))),
+                    PopupMenuItem(enabled: false, child: Text('Change Status'.tr(context), style: TextStyle(fontWeight: FontWeight.bold))),
+                    PopupMenuDivider(),
+                    PopupMenuItem(value: 'Pending', child: Text('Pending'.tr(context))),
+                    PopupMenuItem(value: 'Preparing', child: Text('Preparing'.tr(context))),
+                    PopupMenuItem(value: 'Ready for Delivery', child: Text('Ready for Delivery'.tr(context))),
+                    PopupMenuItem(value: 'Out for Delivery', child: Text('Out for Delivery'.tr(context))),
+                    PopupMenuItem(value: 'Delivered', child: Text('Delivered'.tr(context))),
+                    PopupMenuDivider(),
+                    PopupMenuItem(value: 'Cancelled', child: Text('Cancel Order'.tr(context), style: TextStyle(color: Colors.red))),
                   ],
                 ),
               ],
             ),
             
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0),
               child: Divider(),
             ),
             
             // Order Items
-            const Text('ORDER ITEMS:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-            const SizedBox(height: 8),
+            Text('ORDER ITEMS:'.tr(context), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+            SizedBox(height: 8),
             ...items.map((item) {
               final qty = item['quantity'] ?? 1;
               final name = item['name'] ?? 'Item';
               final instructions = item['specialInstructions'];
               return Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
+                padding: EdgeInsets.only(bottom: 4.0),
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(color: Colors.black87, fontSize: 14),
+                    style: TextStyle(color: Colors.black87, fontSize: 14),
                     children: [
                       TextSpan(text: '${qty}x $name'),
                       if (instructions != null && instructions.toString().isNotEmpty)
-                        TextSpan(text: ' ($instructions)', style: const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic, fontSize: 12)),
+                        TextSpan(text: ' ($instructions)', style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic, fontSize: 12)),
                     ],
                   ),
                 ),
               );
             }),
             
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(vertical: 12.0),
               child: Divider(),
             ),
@@ -216,30 +218,29 @@ class ManageOrderCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('DRIVER', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    const SizedBox(height: 4),
+                    Text('DRIVER'.tr(context), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    SizedBox(height: 4),
                     if (status == 'Pending' || status == 'Preparing')
-                      const Text('Waiting for \'Ready\'', style: TextStyle(fontSize: 12, color: Colors.grey))
+                      Text('Waiting for \'Ready\''.tr(context), style: TextStyle(fontSize: 12, color: Colors.grey))
                     else if (assignedDriver != null)
-                      Text(assignedDriver['name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green))
+                      Text(assignedDriver['name'] ?? 'Unknown', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green))
                     else
                       OutlinedButton(
                         onPressed: () => _showAssignDriverDialog(context),
                         style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 32),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          minimumSize: Size(0, 32),
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                         ),
-                        child: const Text('Assign Driver', style: TextStyle(fontSize: 12)),
+                        child: Text('Assign Driver'.tr(context), style: TextStyle(fontSize: 12)),
                       ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text('TOTAL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    Text(
-                      'BHD ${totalAmount.toStringAsFixed(3)}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
+                    Text('TOTAL'.tr(context), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    Text('BHD ${totalAmount.toStringAsFixed(3)}',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green),
                     ),
                   ],
                 ),

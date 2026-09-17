@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class SystemConfigScreen extends StatelessWidget {
-  const SystemConfigScreen({super.key});
+  SystemConfigScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('System Configuration', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('System Configuration'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -23,17 +25,17 @@ class SystemConfigScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildConfigItem('App Name', 'Merchant App'),
-              const Divider(height: 1),
-              _buildConfigItem('Version', '1.0.0'),
-              const Divider(height: 1),
-              _buildConfigItem('Build Number', '1001'),
-              const Divider(height: 1),
-              _buildConfigItem('Environment', 'UAT'),
-              const Divider(height: 1),
-              _buildConfigItem('Database Connection', 'Connected', isSuccess: true),
-              const Divider(height: 1),
-              _buildConfigItem('Payment Gateway', 'Configured', isSuccess: true),
+              _buildConfigItem('App Name'.tr(context), 'Merchant App'.tr(context)),
+              Divider(height: 1),
+              _buildConfigItem('Version'.tr(context), '1.0.0'),
+              Divider(height: 1),
+              _buildConfigItem('Build Number'.tr(context), '1001'),
+              Divider(height: 1),
+              _buildConfigItem('Environment'.tr(context), 'UAT'.tr(context)),
+              Divider(height: 1),
+              _buildConfigItem('Database Connection'.tr(context), 'Connected'.tr(context), isSuccess: true),
+              Divider(height: 1),
+              _buildConfigItem('Payment Gateway'.tr(context), 'Configured'.tr(context), isSuccess: true),
             ],
           ),
         ),
@@ -43,7 +45,7 @@ class SystemConfigScreen extends StatelessWidget {
 
   Widget _buildConfigItem(String label, String value, {bool isSuccess = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -54,7 +56,7 @@ class SystemConfigScreen extends StatelessWidget {
           Row(
             children: [
               if (isSuccess)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(right: 6.0),
                   child: Icon(Icons.check_circle, color: Colors.green, size: 16),
                 ),

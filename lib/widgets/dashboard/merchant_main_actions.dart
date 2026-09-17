@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../providers/translation_extension.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MerchantMainActions extends StatelessWidget {
-  const MerchantMainActions({super.key});
+  MerchantMainActions({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +18,10 @@ class MerchantMainActions extends StatelessWidget {
         }
 
         return Container(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          padding: EdgeInsets.symmetric(vertical: 24, horizontal: 16),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.primary,
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(24),
               bottomRight: Radius.circular(24),
             ),
@@ -28,10 +30,10 @@ class MerchantMainActions extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildActionItem(Icons.qr_code, 'My QR'),
-              if (!hideKycUpdate) _buildActionItem(Icons.verified_user, 'KYC Update'),
-              _buildActionItem(Icons.credit_card, 'Payments'),
-              _buildActionItem(Icons.send, 'Payment Request'),
+              _buildActionItem(Icons.qr_code, 'My QR'.tr(context)),
+              if (!hideKycUpdate) _buildActionItem(Icons.verified_user, 'KYC Update'.tr(context)),
+              _buildActionItem(Icons.credit_card, 'Payments'.tr(context)),
+              _buildActionItem(Icons.send, 'Payment Request'.tr(context)),
             ],
           ),
         );
@@ -45,18 +47,18 @@ class MerchantMainActions extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
               color: Colors.white24,
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.white, size: 28),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
               fontSize: 11,
               fontWeight: FontWeight.w500,

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class MerchantPaymentScreen extends StatefulWidget {
   final String merchantId;
   final String? cashierId;
   final String? counterNumber;
 
-  const MerchantPaymentScreen({super.key, required this.merchantId, this.cashierId, this.counterNumber});
+  MerchantPaymentScreen({super.key, required this.merchantId, this.cashierId, this.counterNumber});
 
   @override
   State<MerchantPaymentScreen> createState() => _MerchantPaymentScreenState();
@@ -45,7 +47,7 @@ class _MerchantPaymentScreenState extends State<MerchantPaymentScreen> {
     
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid amount greater than 0.')),
+        SnackBar(content: Text('Please enter a valid amount greater than 0.'.tr(context))),
       );
       return;
     }
@@ -66,7 +68,7 @@ class _MerchantPaymentScreenState extends State<MerchantPaymentScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_merchantData == null) {
@@ -76,9 +78,9 @@ class _MerchantPaymentScreenState extends State<MerchantPaymentScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Merchant not found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Go Back')),
+              Text('Merchant not found'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 16),
+              ElevatedButton(onPressed: () => Navigator.pop(context), child: Text('Go Back'.tr(context))),
             ],
           ),
         ),
@@ -91,59 +93,58 @@ class _MerchantPaymentScreenState extends State<MerchantPaymentScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Pay $businessName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Pay $businessName'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             CircleAvatar(
               radius: 48,
               backgroundColor: Colors.grey[200],
               backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
-              child: imageUrl == null ? const Icon(Icons.business, size: 48, color: Colors.grey) : null,
+              child: imageUrl == null ? Icon(Icons.business, size: 48, color: Colors.grey) : null,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
               businessName,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
             ),
-            const SizedBox(height: 48),
+            SizedBox(height: 48),
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(16),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                      decoration: const InputDecoration(
+                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                      decoration: InputDecoration(
                         hintText: '0.000',
                         border: InputBorder.none,
                       ),
                       onChanged: (value) => setState(() {}),
                     ),
                   ),
-                  const Text(
-                    'BHD',
+                  Text('BHD',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 48),
+            SizedBox(height: 48),
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -155,7 +156,7 @@ class _MerchantPaymentScreenState extends State<MerchantPaymentScreen> {
                   elevation: 0,
                 ),
                 onPressed: (double.tryParse(_amountController.text) ?? 0) > 0 ? _proceedToPay : null,
-                child: const Text('Proceed to Pay', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text('Proceed to Pay'.tr(context), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

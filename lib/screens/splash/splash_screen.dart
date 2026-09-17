@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -63,9 +63,9 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     if (cachedUrl == null) {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(Duration(seconds: 1));
     } else {
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: 3));
     }
     _navigateNext();
   }
@@ -82,7 +82,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: _isLoading
-            ? const CircularProgressIndicator()
+            ? CircularProgressIndicator()
             : _imageUrl != null
                 ? Image.network(
                     _imageUrl!,
@@ -91,11 +91,11 @@ class _SplashScreenState extends State<SplashScreen> {
                     height: double.infinity,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(child: CircularProgressIndicator());
                     },
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                    errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
                   )
-                : const CircularProgressIndicator(),
+                : CircularProgressIndicator(),
       ),
     );
   }

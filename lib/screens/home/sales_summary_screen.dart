@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 class UserSalesData {
   String id;
   String name;
@@ -23,7 +25,7 @@ class SalesSummaryScreen extends StatefulWidget {
   final bool isCashier;
   final String? merchantId;
 
-  const SalesSummaryScreen({
+  SalesSummaryScreen({
     super.key,
     this.isCashier = false,
     this.merchantId,
@@ -45,7 +47,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not logged in')));
+      return Scaffold(body: Center(child: Text('Not logged in'.tr(context))));
     }
 
     final targetMerchantId = widget.isCashier ? (widget.merchantId ?? user.uid) : user.uid;
@@ -53,7 +55,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text('Sales Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('Sales Summary'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -76,7 +78,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                           shiftSnapshot.connectionState == ConnectionState.waiting;
 
                       if (isLoading) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Center(child: CircularProgressIndicator());
                       }
 
                       final transactions = txSnapshot.data?.docs.map((d) => d.data() as Map<String, dynamic>).toList() ?? [];
@@ -113,7 +115,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
       case 'week':
         startInterval = now.subtract(Duration(days: now.weekday % 7));
         startInterval = DateTime(startInterval.year, startInterval.month, startInterval.day);
-        endInterval = startInterval.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+        endInterval = startInterval.add(Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
         break;
       case 'month':
         startInterval = DateTime(now.year, now.month, 1);
@@ -254,30 +256,30 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     final outstandingVouchersBalance = vouchersSoldAmount - vouchersUsedAmount;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildTimeframeSelector(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Row(
             children: [
               Expanded(child: _buildStatCard('Total Sales', '${totalSales.toStringAsFixed(3)} BHD', Icons.monetization_on_outlined)),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(child: _buildStatCard('Total Transactions', totalTransactions.toString(), Icons.receipt_long_outlined)),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildSalesChart(filteredTransactions, startInterval, endInterval),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (!widget.isCashier) ...[
             _buildStaffSalesComparison(supervisorData, cashierMap.values.toList()),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
           _buildVouchersPerformance(vouchersSoldCount, vouchersSoldAmount, vouchersUsedCount, vouchersUsedAmount, outstandingVouchersBalance),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildSupervisorSummary(widget.isCashier && cashierMap.containsKey(_auth.currentUser?.uid) ? cashierMap[_auth.currentUser!.uid]! : supervisorData, widget.isCashier),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (!widget.isCashier) ...[
             _buildCashierPerformance(cashierMap.values.toList()),
           ],
@@ -288,7 +290,7 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
 
   Widget _buildTimeframeSelector() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -300,22 +302,22 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
           Row(
             children: [
               Icon(Icons.calendar_month, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 8),
-              Text('FILTER TIMEFRAME', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[600])),
+              SizedBox(width: 8),
+              Text('FILTER TIMEFRAME'.tr(context), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[600])),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: ['day', 'week', 'month', 'year', 'custom'].map((mode) {
                 final isSelected = _timeframe == mode;
                 return Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
+                  padding: EdgeInsets.only(right: 8.0),
                   child: InkWell(
                     onTap: () => setState(() => _timeframe = mode),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: isSelected ? Colors.green : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
@@ -338,11 +340,11 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
 
   Widget _buildStatCard(String title, String value, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         children: [
@@ -350,12 +352,12 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 20, color: Colors.grey[600]),
-              const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+              SizedBox(width: 8),
+              Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+          SizedBox(height: 8),
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
         ],
       ),
     );
@@ -442,19 +444,19 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${_timeframe[0].toUpperCase()}${_timeframe.substring(1)}ly Sales Performance', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 4),
-          Text('Sales breakdown for the selected timeframe.', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-          const SizedBox(height: 24),
+          Text('${_timeframe[0].toUpperCase()}${_timeframe.substring(1)}ly Sales Performance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          SizedBox(height: 4),
+          Text('Sales breakdown for the selected timeframe.'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          SizedBox(height: 24),
           SizedBox(
             height: 200,
             child: (transactions.isEmpty || maxTotal == 0)
@@ -462,8 +464,8 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.bar_chart, size: 48, color: Colors.grey[400]),
-                    const SizedBox(height: 8),
-                    Text('No sales data for this timeframe.', style: TextStyle(color: Colors.grey[500])),
+                    SizedBox(height: 8),
+                    Text('No sales data for this timeframe.'.tr(context), style: TextStyle(color: Colors.grey[500])),
                   ],
                 ))
               : BarChart(
@@ -482,11 +484,11 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                         getTitlesWidget: (value, meta) {
                           if (value.toInt() >= 0 && value.toInt() < titles.length) {
                             return Padding(
-                              padding: const EdgeInsets.only(top: 8),
+                              padding: EdgeInsets.only(top: 8),
                               child: Text(titles[value.toInt()], style: TextStyle(fontSize: 10, color: Colors.grey[600])),
                             );
                           }
-                          return const SizedBox();
+                          return SizedBox();
                         },
                       ),
                     ),
@@ -523,23 +525,23 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
     }
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Staff Sales Comparison', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 4),
-          Text('Compare sales totals between supervisor and cashiers.', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-          const SizedBox(height: 24),
+          Text('Staff Sales Comparison'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          SizedBox(height: 4),
+          Text('Compare sales totals between supervisor and cashiers.'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          SizedBox(height: 24),
           SizedBox(
             height: 200,
             child: (supervisor.totalSales == 0 && cashiers.every((c) => c.totalSales == 0))
-              ? Center(child: Text('No sales data', style: TextStyle(color: Colors.grey[500])))
+              ? Center(child: Text('No sales data'.tr(context), style: TextStyle(color: Colors.grey[500])))
               : BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
@@ -554,11 +556,11 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            if (value.toInt() == 0) return Padding(padding: const EdgeInsets.only(top: 8), child: Text('Supervisor', style: TextStyle(fontSize: 10, color: Colors.grey[600])));
+                            if (value.toInt() == 0) return Padding(padding: EdgeInsets.only(top: 8), child: Text('Supervisor'.tr(context), style: TextStyle(fontSize: 10, color: Colors.grey[600])));
                             if (value.toInt() - 1 < cashiers.length) {
-                              return Padding(padding: const EdgeInsets.only(top: 8), child: Text(cashiers[value.toInt() - 1].name.split(' ')[0], style: TextStyle(fontSize: 10, color: Colors.grey[600])));
+                              return Padding(padding: EdgeInsets.only(top: 8), child: Text(cashiers[value.toInt() - 1].name.split(' ')[0], style: TextStyle(fontSize: 10, color: Colors.grey[600])));
                             }
-                            return const SizedBox();
+                            return SizedBox();
                           },
                         ),
                       ),
@@ -574,30 +576,30 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
 
   Widget _buildVouchersPerformance(int count, double amount, int usedCount, double usedAmount, double balance) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: const Border(left: BorderSide(color: Colors.indigo, width: 4)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        border: Border(left: BorderSide(color: Colors.indigo, width: 4)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.confirmation_num, color: Colors.indigo, size: 20),
-              const SizedBox(width: 8),
-              const Text('Vouchers Performance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Icon(Icons.confirmation_num, color: Colors.indigo, size: 20),
+              SizedBox(width: 8),
+              Text('Vouchers Performance'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
-          const SizedBox(height: 4),
-          Text('Vouchers sold, used and outstanding balance.', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-          const SizedBox(height: 16),
+          SizedBox(height: 4),
+          Text('Vouchers sold, used and outstanding balance.'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          SizedBox(height: 16),
           _buildRow('Vouchers Sold:', '$count sold (${amount.toStringAsFixed(3)} BHD)', Colors.black),
-          const Divider(),
+          Divider(),
           _buildRow('Vouchers Redeemed:', '$usedCount used (${usedAmount.toStringAsFixed(3)} BHD)', Colors.green),
-          const Divider(),
+          Divider(),
           _buildRow('Outstanding Balance:', '${balance.toStringAsFixed(3)} BHD', Colors.indigo, isBold: true),
         ],
       ),
@@ -606,28 +608,28 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
 
   Widget _buildSupervisorSummary(UserSalesData data, bool isCashier) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: Colors.green, width: 4)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.person_outline, color: Colors.green, size: 20),
-              const SizedBox(width: 8),
-              Text(isCashier ? 'My Summary' : 'Supervisor Summary', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Icon(Icons.person_outline, color: Colors.green, size: 20),
+              SizedBox(width: 8),
+              Text(isCashier ? 'My Summary' : 'Supervisor Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _buildRow(isCashier ? 'My Sales:' : 'Own Sales:', '${data.totalSales.toStringAsFixed(3)} BHD', Colors.black, isBold: true),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
@@ -638,13 +640,13 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Completed Requests:', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                      const SizedBox(height: 4),
+                      Text('Completed Requests:'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.check_circle_outline, color: Colors.green, size: 14),
-                          const SizedBox(width: 4),
-                          Text('${data.completedRequestsCount} (${data.completedRequestsAmount.toStringAsFixed(3)} BHD)', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Icon(Icons.check_circle_outline, color: Colors.green, size: 14),
+                          SizedBox(width: 4),
+                          Text('${data.completedRequestsCount} (${data.completedRequestsAmount.toStringAsFixed(3)} BHD)', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
                         ],
                       ),
                     ],
@@ -654,13 +656,13 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Pending Requests:', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                      const SizedBox(height: 4),
+                      Text('Pending Requests:'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.access_time, color: Colors.orange, size: 14),
-                          const SizedBox(width: 4),
-                          Text('${data.pendingRequestsCount} (${data.pendingRequestsAmount.toStringAsFixed(3)} BHD)', style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Icon(Icons.access_time, color: Colors.orange, size: 14),
+                          SizedBox(width: 4),
+                          Text('${data.pendingRequestsCount} (${data.pendingRequestsAmount.toStringAsFixed(3)} BHD)', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
                         ],
                       ),
                     ],
@@ -669,14 +671,14 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text('Payment Methods Breakdown:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey[600])),
-          const SizedBox(height: 8),
+          SizedBox(height: 12),
+          Text('Payment Methods Breakdown:'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey[600])),
+          SizedBox(height: 8),
           if (data.paymentMethods.isEmpty)
-            Text('No sales recorded yet.', style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[500], fontSize: 12))
+            Text('No sales recorded yet.'.tr(context), style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[500], fontSize: 12))
           else
             ...data.paymentMethods.entries.map((e) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: EdgeInsets.only(bottom: 4),
               child: _buildRow('${e.key}:', '${e.value.toStringAsFixed(3)} BHD', Colors.grey[700]!),
             )),
         ],
@@ -686,26 +688,26 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
 
   Widget _buildCashierPerformance(List<UserSalesData> cashiers) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: const Border(left: BorderSide(color: Colors.blue, width: 4)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        border: Border(left: BorderSide(color: Colors.blue, width: 4)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.list_alt, color: Colors.blue, size: 20),
-              const SizedBox(width: 8),
-              const Text('Cashier Performance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Icon(Icons.list_alt, color: Colors.blue, size: 20),
+              SizedBox(width: 8),
+              Text('Cashier Performance'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (cashiers.isEmpty)
-            Center(child: Text('No cashiers registered.', style: TextStyle(color: Colors.grey[500], fontSize: 14)))
+            Center(child: Text('No cashiers registered.'.tr(context), style: TextStyle(color: Colors.grey[500], fontSize: 14)))
           else
             ...cashiers.map((c) => _buildCashierItem(c)),
         ],
@@ -715,31 +717,31 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
 
   Widget _buildCashierItem(UserSalesData c) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black12))),
-      padding: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.black12))),
+      padding: EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(c.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: Colors.blue[50], borderRadius: BorderRadius.circular(12)),
                 child: Text('Total: ${c.totalSales.toStringAsFixed(3)} BHD', style: TextStyle(color: Colors.blue[800], fontWeight: FontWeight.bold, fontSize: 12)),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8),
             decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(6)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Today's End of Day Sales:", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                Text("Today's End of Day Sales:".tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                 Row(
                   children: [
                     Container(
@@ -749,16 +751,16 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                         color: c.eodStatusToday == 'Closed' ? Colors.green : Colors.amber,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Text('${c.eodSalesToday.toStringAsFixed(3)} BHD (${c.eodStatusToday})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    SizedBox(width: 6),
+                    Text('${c.eodSalesToday.toStringAsFixed(3)} BHD (${c.eodStatusToday})', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
@@ -769,13 +771,13 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Completed Requests:', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                      const SizedBox(height: 4),
+                      Text('Completed Requests:'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.check_circle_outline, color: Colors.green, size: 14),
-                          const SizedBox(width: 4),
-                          Text('${c.completedRequestsCount} (${c.completedRequestsAmount.toStringAsFixed(3)} BHD)', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Icon(Icons.check_circle_outline, color: Colors.green, size: 14),
+                          SizedBox(width: 4),
+                          Text('${c.completedRequestsCount} (${c.completedRequestsAmount.toStringAsFixed(3)} BHD)', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
                         ],
                       ),
                     ],
@@ -785,13 +787,13 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Pending Requests:', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                      const SizedBox(height: 4),
+                      Text('Pending Requests:'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                      SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.access_time, color: Colors.orange, size: 14),
-                          const SizedBox(width: 4),
-                          Text('${c.pendingRequestsCount} (${c.pendingRequestsAmount.toStringAsFixed(3)} BHD)', style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Icon(Icons.access_time, color: Colors.orange, size: 14),
+                          SizedBox(width: 4),
+                          Text('${c.pendingRequestsCount} (${c.pendingRequestsAmount.toStringAsFixed(3)} BHD)', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 12)),
                         ],
                       ),
                     ],
@@ -800,14 +802,14 @@ class _SalesSummaryScreenState extends State<SalesSummaryScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          Text('Payment Methods Breakdown:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey[600])),
-          const SizedBox(height: 8),
+          SizedBox(height: 12),
+          Text('Payment Methods Breakdown:'.tr(context), style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey[600])),
+          SizedBox(height: 8),
           if (c.paymentMethods.isEmpty)
-            Text('No sales recorded yet.', style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[500], fontSize: 12))
+            Text('No sales recorded yet.'.tr(context), style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey[500], fontSize: 12))
           else
             ...c.paymentMethods.entries.map((e) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: EdgeInsets.only(bottom: 4),
               child: _buildRow('${e.key}:', '${e.value.toStringAsFixed(3)} BHD', Colors.grey[700]!),
             )),
         ],

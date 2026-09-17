@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class DashboardHeader extends StatelessWidget {
-  const DashboardHeader({super.key});
+  DashboardHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +15,10 @@ class DashboardHeader extends StatelessWidget {
     const double progressPercent = 0.45; // 45%
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
         ),
@@ -39,8 +41,7 @@ class DashboardHeader extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    'ATTA',
+                  child: Text('ATTA'.tr(context),
                     style: TextStyle(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -51,30 +52,29 @@ class DashboardHeader extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                      icon: Icon(Icons.shopping_cart, color: Colors.white),
                       onPressed: () {},
                     ),
                     Stack(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.notifications, color: Colors.white),
+                          icon: Icon(Icons.notifications, color: Colors.white),
                           onPressed: () {},
                         ),
                         Positioned(
                           right: 8,
                           top: 8,
                           child: Container(
-                            padding: const EdgeInsets.all(2),
+                            padding: EdgeInsets.all(2),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.error,
                               shape: BoxShape.circle,
                             ),
-                            constraints: const BoxConstraints(
+                            constraints: BoxConstraints(
                               minWidth: 16,
                               minHeight: 16,
                             ),
-                            child: const Text(
-                              '3',
+                            child: Text('3'.tr(context),
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
@@ -88,10 +88,9 @@ class DashboardHeader extends StatelessWidget {
                     // Avatar / Menu
                     GestureDetector(
                       onTap: () {},
-                      child: const CircleAvatar(
+                      child: CircleAvatar(
                         backgroundColor: Colors.white24,
-                        child: Text(
-                          'U',
+                        child: Text('U'.tr(context),
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -100,15 +99,14 @@ class DashboardHeader extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             
             // Greeting & Points
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
-                  'Hi User!',
+                Text('Hi User!'.tr(context),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -118,16 +116,14 @@ class DashboardHeader extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      '$loyaltyPoints LP',
-                      style: const TextStyle(
+                    Text('$loyaltyPoints LP'.tr(context),
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Text(
-                      'Click to check BD',
+                    Text('Click to check BD'.tr(context),
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -139,23 +135,21 @@ class DashboardHeader extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             
             // Tier Progress
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$currentTier Tier'.toUpperCase(),
-                  style: const TextStyle(
+                Text('$currentTier ${\'Tier\'.tr(context)}').toUpperCase(),
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
                   ),
                 ),
-                const Text(
-                  '1250 / 5000 pts for Gold',
+                Text('1250 / 5000 pts for Gold'.tr(context),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 11,
@@ -164,7 +158,7 @@ class DashboardHeader extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             // Progress Bar
             Container(
               height: 6,

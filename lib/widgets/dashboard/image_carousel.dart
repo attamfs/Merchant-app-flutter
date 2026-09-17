@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DashboardImageCarousel extends StatefulWidget {
-  const DashboardImageCarousel({super.key});
+  DashboardImageCarousel({super.key});
 
   @override
   State<DashboardImageCarousel> createState() => _DashboardImageCarouselState();
@@ -13,7 +13,7 @@ class _DashboardImageCarouselState extends State<DashboardImageCarousel> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: SizedBox(
         height: 160,
         child: PageView(
@@ -30,7 +30,7 @@ class _DashboardImageCarouselState extends State<DashboardImageCarousel> {
 
   Widget _buildAdCard(BuildContext context, String text, Color color) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      margin: EdgeInsets.symmetric(horizontal: 4.0),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(12),
@@ -38,7 +38,7 @@ class _DashboardImageCarouselState extends State<DashboardImageCarousel> {
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.black54,
             fontWeight: FontWeight.bold,
           ),

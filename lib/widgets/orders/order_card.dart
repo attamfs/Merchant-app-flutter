@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class OrderCard extends StatelessWidget {
   final String orderId;
   final Map<String, dynamic> orderData;
 
-  const OrderCard({super.key, required this.orderId, required this.orderData});
+  OrderCard({super.key, required this.orderId, required this.orderData});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class OrderCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
         border: Border.all(color: Colors.grey[200]!),
@@ -32,32 +34,30 @@ class OrderCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Order #${orderId.substring(0, 6).toUpperCase()}',
-                      style: const TextStyle(
+                    Text('Order #${orderId.substring(0, 6).toUpperCase()}',
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black54,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       customerName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                Text(
-                  'BHD $displayTotal',
+                Text('BHD $displayTotal',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -67,9 +67,9 @@ class OrderCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Expanded(
@@ -78,21 +78,21 @@ class OrderCard extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.grey[700],
                       side: BorderSide(color: Colors.grey[300]!),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('Decline'),
+                    child: Text('Decline'.tr(context)),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                     ),
-                    child: const Text('Accept Order'),
+                    child: Text('Accept Order'.tr(context)),
                   ),
                 ),
               ],

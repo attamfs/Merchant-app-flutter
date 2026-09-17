@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/translation_extension.dart';
 
 class DashboardOrderAgain extends StatelessWidget {
-  const DashboardOrderAgain({super.key});
+  DashboardOrderAgain({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,24 +18,23 @@ class DashboardOrderAgain extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Order Again',
+          Text('Order Again'.tr(context),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           SizedBox(
             height: 90,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: merchants.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 16),
+              separatorBuilder: (context, index) => SizedBox(width: 16),
               itemBuilder: (context, index) {
                 return _buildMerchantItem(context, merchants[index]);
               },
@@ -58,18 +59,18 @@ class DashboardOrderAgain extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.grey[300]!),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.store,
               color: Colors.grey,
               size: 32,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           SizedBox(
             width: 64,
             child: Text(
               name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
               ),

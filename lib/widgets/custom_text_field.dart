@@ -13,7 +13,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final FocusNode? focusNode;
 
-  const CustomTextField({
+  CustomTextField({
     super.key,
     required this.hintText,
     this.controller,
@@ -40,7 +40,7 @@ class CustomTextField extends StatelessWidget {
       maxLength: maxLength,
       onChanged: onChanged,
       validator: validator,
-      style: const TextStyle(fontSize: 14),
+      style: TextStyle(fontSize: 14),
       decoration: InputDecoration(
         hintText: hintText,
         errorText: errorText,
@@ -48,7 +48,7 @@ class CustomTextField extends StatelessWidget {
         hintStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.5)),
         filled: true,
         fillColor: theme.colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
